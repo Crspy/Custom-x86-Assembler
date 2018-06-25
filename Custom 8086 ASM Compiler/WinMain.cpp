@@ -7,7 +7,7 @@
 
 void ProcessOpenFileButton(HWND hWnd, WPARAM wParam, LPARAM lParam, HWND hwndOpenFileBtn, HWND hwnd_ed_u, wchar_t (*szFile)[WCHAR_MAX], wchar_t** pSelectedFileName);
 
-void ProcessCompileButton(HWND hWnd, WPARAM wParam, LPARAM lParam, HWND hwndCompileBtn, wchar_t** pSelectedFileName);
+void ProcessCompileButton(HWND hWnd, WPARAM wParam, LPARAM lParam, HWND hwndCompileBtn, wchar_t** pSelectedFileName,BOOL* bSortInFolders);
 
 // Global variables
 
@@ -46,7 +46,8 @@ int CALLBACK WinMain(
                 freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
                 freopen_s((FILE**)stdin, "CONIN$", "r", stdin);
             }
-            ProcessCompile(argv[i]);
+            BOOL bSortInFolders = TRUE;
+            ProcessCompile(argv[i],&bSortInFolders);
         }
 
     }
@@ -138,6 +139,7 @@ int CALLBACK WinMain(
 //  WM_DESTROY  - post a quit message and return
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    static BOOL bSortInFolders = true;
     PAINTSTRUCT ps;
     HDC hdc;
     TCHAR greeting[] = L"Hello, Welcome to 8086 ASM Compiler";
@@ -145,6 +147,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     static HWND hwndCompileBtn = NULL;
     static HWND hwnd_st_u = NULL, hwnd_ed_u = NULL;
     static wchar_t* SelectedFileName = NULL;
+    static HWND hWndCheckBox = NULL;
     wchar_t szFile[WCHAR_MAX];       // buffer for file name
 
 
@@ -155,6 +158,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_CREATE:
     {
+        hWndCheckBox = CreateWindow(L"button",L"Sort In Folders",
+            WS_VISIBLE | WS_CHILD | BS_CHECKBOX,
+            20, 20, 185, 35,
+            hWnd, (HMENU)1, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
+        CheckDlgButton(hWnd, 1, BST_CHECKED);
+
         hwndOpenFileBtn = CreateWindow(
             L"BUTTON",  // Predefined class; Unicode assumed 
             L"OpenFile",      // Button text 
@@ -204,11 +213,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     case WM_COMMAND:
+    {
+
+
         if (((HWND)lParam == hwndOpenFileBtn) && (LOWORD(wParam) == BN_CLICKED))
             ProcessOpenFileButton(hWnd, wParam, lParam, hwndOpenFileBtn, hwnd_ed_u, &szFile, &SelectedFileName);
         else if (((HWND)lParam == hwndCompileBtn) && (LOWORD(wParam) == BN_CLICKED))
-            ProcessCompileButton(hWnd, wParam, lParam, hwndCompileBtn, &SelectedFileName);
+            ProcessCompileButton(hWnd, wParam, lParam, hwndCompileBtn, &SelectedFileName, &bSortInFolders);
+        else if (IsDlgButtonChecked(hWnd, 1)) {
+            CheckDlgButton(hWnd, 1, BST_UNCHECKED);
+            bSortInFolders = false;
+        }
+        else {
+            CheckDlgButton(hWnd, 1, BST_CHECKED);
+            bSortInFolders = true;
+        }
         break;
+    }
     case WM_PAINT:
         hdc = BeginPaint(hWnd, &ps);
 
@@ -272,7 +293,7 @@ void ProcessOpenFileButton(HWND hWnd, WPARAM wParam, LPARAM lParam, HWND hwndOpe
 
 }
 
-void ProcessCompileButton(HWND hWnd, WPARAM wParam, LPARAM lParam, HWND hwndCompileBtn, wchar_t** pSelectedFileName)
+void ProcessCompileButton(HWND hWnd, WPARAM wParam, LPARAM lParam, HWND hwndCompileBtn, wchar_t** pSelectedFileName,BOOL* bSortInFolders)
 {
     if (*pSelectedFileName == NULL)
         MessageBox(hWnd, L"Please Browse the file path first !", L"Error", MB_OK);
@@ -283,6 +304,6 @@ void ProcessCompileButton(HWND hWnd, WPARAM wParam, LPARAM lParam, HWND hwndComp
             _wfreopen_s((FILE**)stdout, L"CONOUT$", L"w", stdout);
             _wfreopen_s((FILE**)stdin, L"CONIN$", L"r", stdin);
         }
-        ProcessCompile(*pSelectedFileName);
+        ProcessCompile(*pSelectedFileName,bSortInFolders);
     }
 }
