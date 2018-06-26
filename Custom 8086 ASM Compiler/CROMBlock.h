@@ -16,7 +16,7 @@ public:
         {   
             uint16_t regALU_id : 2;
             uint16_t always_1 : 1;
-            uint16_t opcode : 5; // always 6
+            uint16_t const_ALU_opcode : 5; // always 6
             
             uint16_t alu_op : 5;
             uint16_t not_important : 1; // yet

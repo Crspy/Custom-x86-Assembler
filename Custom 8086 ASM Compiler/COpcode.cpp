@@ -20,9 +20,9 @@ int8_t COpcode::GetRegID(const char* lineReg)
 void COpcode::EliminateComments(char* line)
 {
     char keys[] = "/;";
-    char* pch = NULL;
-    pch = strpbrk(line, keys);
-    while (pch != NULL)
+
+    char* pch = strpbrk(line, keys);
+    while (pch != nullptr)
     {
 
         strcpy(pch, "\0");
@@ -33,9 +33,10 @@ void COpcode::EliminateComments(char* line)
 void COpcode::EliminateTabs(char* line)
 {
     char keys[] = "\t";
-    char* pch = NULL;
-    pch = strpbrk(line, keys);
-    while (pch != NULL)
+
+    char* pch = strpbrk(line, keys);
+
+    while (pch != nullptr)
     {
 
         strcpy(pch, "\0");
@@ -56,23 +57,21 @@ eOpcodeDir COpcode::GetOpcodeDir(std::string line)
 
 eErrorType COpcode::ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer)
 {
-    int8_t reg;
-    char * token;
     currentInst[0].opcode = eOpcode::MOVE_IN;
 
     currentInst[0].dir_flag = eOpcodeDir::DIR_IN;
 
 
-    token = strtok(NULL, " ,[]/");
+    char * token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateTabs(token);
-    reg = GetRegID(token);
+    int8_t reg = GetRegID(token);
     if (reg == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
-    token = strtok(NULL, " ,[]/");
+    token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateComments(token); EliminateTabs(token);
     if (GetRegID(token) >= 0)
@@ -80,7 +79,7 @@ eErrorType COpcode::ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, 
         return eErrorType::USING_REGNAME_INSTEAD_OF_ADDRESS;
     }
 
-    memadd->m_Address = strtol(token, NULL, 0);
+    memadd->m_Address = strtol(token, nullptr, 0);
 
     if (!memadd->InsureMovAddress())
     {
@@ -112,13 +111,10 @@ eErrorType COpcode::ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, 
 eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer,
     bool* bMovingData, CROMBlock* myrom)
 {
-    int8_t reg;
-
-    char* token;
     currentInst[0].opcode = eOpcode::MOVE_OUT;
     currentInst[0].dir_flag = eOpcodeDir::DIR_OUT;
 
-    token = strtok(NULL, " [], \t");
+    char * token = strtok(nullptr, " [], \t");
     logger(token);
     EliminateTabs(token);
     if (GetRegID(token) >= 0)
@@ -127,14 +123,14 @@ eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst,
 
     }
 
-    memadd->m_Address = strtol(token, NULL, 0);
+    memadd->m_Address = strtol(token, nullptr, 0);
     logger(memadd->m_Address);
 
-    token = strtok(NULL, " [], \t");
+    token = strtok(nullptr, " [], \t");
     
     EliminateComments(token); EliminateTabs(token);
 
-    reg = GetRegID(token);
+    int8_t reg = GetRegID(token);
 
     if (reg != -1)
     {
@@ -167,7 +163,7 @@ eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst,
 
         try
         {
-            lvalue = strtol(token, NULL, 0);
+            lvalue = strtol(token, nullptr, 0);
             logger("VALUE");
             logger(lvalue);
         }
@@ -193,8 +189,8 @@ eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst,
                 {
                     const int16_t svalue = lvalue;
                     // swapping endianess
-                    *((char*)&myrom->DataSeg[memadd->m_Address].value + 1) = *(((char*)&svalue));
-                    *((char*)&myrom->DataSeg[memadd->m_Address].value) = *(((char*)& svalue + 1));
+                    *(reinterpret_cast<char*>(&myrom->DataSeg[memadd->m_Address].value) + 1) = *((char*)&svalue);
+                    *reinterpret_cast<char*>(&myrom->DataSeg[memadd->m_Address].value) = *(((char*)& svalue + 1));
                 }
                 else
                     return eErrorType::DATA_VALUE_OUTOFBOUNDS;
@@ -203,8 +199,8 @@ eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst,
             {
                 const uint16_t usvalue = lvalue;
                 // swapping endianess
-                *((char*)&myrom->DataSeg[memadd->m_Address].value + 1) = *(((char*)&usvalue));
-                *((char*)&myrom->DataSeg[memadd->m_Address].value) = *(((char*)& usvalue + 1));
+                *(reinterpret_cast<char*>(&myrom->DataSeg[memadd->m_Address].value) + 1) = *(((char*)&usvalue));
+                *reinterpret_cast<char*>(&myrom->DataSeg[memadd->m_Address].value) = *(((char*)& usvalue + 1));
             }
 
         }
@@ -220,27 +216,23 @@ eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst,
 eErrorType COpcode::ProcessIndirectMoveOUT(tMemAddress* memadd, tInstBlock* currentInst,
     char* linebuffer)
 {
-    int8_t reg;
-    int8_t reg2;
-    char* token;
-
     currentInst[0].opcode = eOpcode::INDIRECT_OUT;
 
     currentInst[0].dir_flag = eOpcodeDir::DIR_OUT;
 
-    token = strtok(NULL, " [], \t");
+    char * token = strtok(nullptr, " [], \t");
     logger(token);
     EliminateTabs(token);
-    reg2 = GetRegID(token);
+    int8_t reg2 = GetRegID(token);
     if (reg2 == -1 || reg2 != eRegID::BX) // then it's moving value to dataSeg
     {
         return eErrorType::UNKNOWN_REG_NAME_OR_NOT_USING_BX_IN_LEFT_OPERAND;
     }
 
-    token = strtok(NULL, " [], \t");
+    token = strtok(nullptr, " [], \t");
     logger(token);
     EliminateComments(token); EliminateTabs(token);
-    reg = GetRegID(token);
+    int8_t reg = GetRegID(token);
     if (reg == -1 || reg == eRegID::BX) // then it's moving value to dataSeg
     {
         return eErrorType::UNKNOWN_REG_NAME_OR_USING_BX_IN_RIGHT_OPERAND;
@@ -253,26 +245,22 @@ eErrorType COpcode::ProcessIndirectMoveOUT(tMemAddress* memadd, tInstBlock* curr
 eErrorType COpcode::ProcessIndirectMoveIN(tMemAddress* memadd, tInstBlock* currentInst,
     char* linebuffer)
 {
-    int8_t reg;
-    int8_t reg2;
-    char* token;
-
     currentInst[0].opcode = eOpcode::INDIRECT_IN;
     currentInst[0].dir_flag = eOpcodeDir::DIR_IN;
 
-    token = strtok(NULL, " [], \t");
+    char * token = strtok(nullptr, " [], \t");
     logger(token);
     EliminateTabs(token);
-    reg = GetRegID(token);
+    int8_t reg = GetRegID(token);
     if (reg == -1 || reg == eRegID::BX) // then it's moving value to dataSeg
     {
         return eErrorType::UNKNOWN_REG_NAME_OR_USING_BX_IN_LEFT_OPERAND;
     }
 
-    token = strtok(NULL, " [], \t");
+    token = strtok(nullptr, " [], \t");
     logger(token);
 
-    reg2 = GetRegID(token);
+    int8_t reg2 = GetRegID(token);
     if (reg2 == -1 || reg2 != eRegID::BX) // then it's moving value to dataSeg
     {
         return eErrorType::UNKNOWN_REG_NAME_OR_NOT_USING_BX_IN_RIGHT_OPERAND;
@@ -285,18 +273,17 @@ eErrorType COpcode::ProcessIndirectMoveIN(tMemAddress* memadd, tInstBlock* curre
 eErrorType COpcode::ProcessJump(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
     std::map<std::string, uint32_t>& jmplabelsmap, std::map<std::string, uint32_t>& labelsmap/*, std::map<uint32_t, tMemAddress>& memaddressesMap*/)
 {
-    char* token;
     currentInst[0].opcode = eOpcode::JUMP;
 
 
-    token = strtok(NULL, " [], \t");
+    char * token = strtok(nullptr, " [], \t");
     logger(token);
     EliminateComments(token); EliminateTabs(token);
     logger(token);
-    if (IsNumbersOnly(token))
+    if (is_numbers_only(token))
     {
         //logger("Numbers ONLY");
-        memadd->m_Address = strtol(token, NULL, 0);
+        memadd->m_Address = strtol(token, nullptr, 0);
         logger(token);
         if (!memadd->InsureJmpAddress())
         {
@@ -317,7 +304,7 @@ eErrorType COpcode::ProcessJump(tMemAddress* memadd, tInstBlock* currentInst, ch
             currentInst[0].address = memadd->byte0;           
         }
     }
-    else if (IsAlphaOnly(token)) 
+    else if (is_alpha_only(token)) 
     {
         //logger("ALPHA ONLY");
         //std::cin.get();
@@ -337,18 +324,15 @@ eErrorType COpcode::ProcessJump(tMemAddress* memadd, tInstBlock* currentInst, ch
 
 eErrorType COpcode::ProcessNot(tInstBlock* currentInst, char* linebuffer)
 {
-    int8_t reg;
-    char * token;
-
-    currentInst[0].opcode = eOpcode::ALU;
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
     currentInst[0].alu_op = eALUOpcode::NOT;
     currentInst[0].always_1 = 1;
 
 
-    token = strtok(NULL, " ,[]/");
+    char * token = strtok(nullptr, " ,[]/");
     printf(token);
     EliminateComments(token); EliminateTabs(token);
-    reg = GetRegID(token);
+    int8_t reg = GetRegID(token);
 
     if (reg == -1)
     {
@@ -363,18 +347,15 @@ eErrorType COpcode::ProcessNot(tInstBlock* currentInst, char* linebuffer)
 
 eErrorType COpcode::ProcessTransfer(tInstBlock* currentInst, char* linebuffer)
 {
-    int8_t reg;
-    char * token;
-
-    currentInst[0].opcode = eOpcode::ALU;
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
     currentInst[0].alu_op = eALUOpcode::TRANSFER;
     currentInst[0].always_1 = 1;
 
 
-    token = strtok(NULL, " ,[]/");
+    char * token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateComments(token); EliminateTabs(token);
-    reg = GetRegID(token);
+    int8_t reg = GetRegID(token);
 
     if (reg == -1)
     {
@@ -388,18 +369,15 @@ eErrorType COpcode::ProcessTransfer(tInstBlock* currentInst, char* linebuffer)
 
 eErrorType COpcode::ProcessInc(tInstBlock* currentInst, char* linebuffer)
 {
-    int8_t reg;
-    char * token;
-
-    currentInst[0].opcode = eOpcode::ALU;
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
     currentInst[0].alu_op = eALUOpcode::INC;
     currentInst[0].always_1 = 1;
 
 
-    token = strtok(NULL, " ,[]/");
+    char * token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateComments(token); EliminateTabs(token);
-    reg = GetRegID(token);
+    int8_t reg = GetRegID(token);
 
     if (reg == -1)
     {
@@ -413,18 +391,15 @@ eErrorType COpcode::ProcessInc(tInstBlock* currentInst, char* linebuffer)
 
 eErrorType COpcode::ProcessDec(tInstBlock* currentInst, char* linebuffer)
 {
-    int8_t reg;
-    char * token;
-
-    currentInst[0].opcode = eOpcode::ALU;
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
     currentInst[0].alu_op = eALUOpcode::DEC;
     currentInst[0].always_1 = 1;
 
 
-    token = strtok(NULL, " ,[]/");
+    char * token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateComments(token); EliminateTabs(token);
-    reg = GetRegID(token);
+    int8_t reg = GetRegID(token);
 
     if (reg == -1)
     {
@@ -439,29 +414,25 @@ eErrorType COpcode::ProcessDec(tInstBlock* currentInst, char* linebuffer)
 
 eErrorType COpcode::ProcessXor(tInstBlock* currentInst, char* linebuffer)
 {
-    int8_t reg;
-    int8_t reg2;
-    char * token;
-
-    currentInst[0].opcode = eOpcode::ALU;
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
     currentInst[0].alu_op = eALUOpcode::XOR;
     currentInst[0].always_1 = 1;
 
 
-    token = strtok(NULL, " ,[]/");
+    char * token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateTabs(token);
-    reg = GetRegID(token);
+    int8_t reg = GetRegID(token);
 
     if (reg == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
-    token = strtok(NULL, " ,[]/");
+    token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateComments(token); EliminateTabs(token);
-    reg2 = GetRegID(token);
+    int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
@@ -474,29 +445,25 @@ eErrorType COpcode::ProcessXor(tInstBlock* currentInst, char* linebuffer)
 
 eErrorType COpcode::ProcessOR(tInstBlock* currentInst, char* linebuffer)
 {
-    int8_t reg;
-    int8_t reg2;
-    char * token;
-
-    currentInst[0].opcode = eOpcode::ALU;
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
     currentInst[0].alu_op = eALUOpcode::OR;
     currentInst[0].always_1 = 1;
 
 
-    token = strtok(NULL, " ,[]/");
+    char * token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateTabs(token);
-    reg = GetRegID(token);
+    int8_t reg = GetRegID(token);
 
     if (reg == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
-    token = strtok(NULL, " ,[]/");
+    token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateComments(token); EliminateTabs(token);
-    reg2 = GetRegID(token);
+    int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
@@ -510,29 +477,25 @@ eErrorType COpcode::ProcessOR(tInstBlock* currentInst, char* linebuffer)
 
 eErrorType COpcode::ProcessAND(tInstBlock* currentInst, char* linebuffer)
 {
-    int8_t reg;
-    int8_t reg2;
-    char * token;
-
-    currentInst[0].opcode = eOpcode::ALU;
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
     currentInst[0].alu_op = eALUOpcode::AND;
     currentInst[0].always_1 = 1;
 
 
-    token = strtok(NULL, " ,[]/");
+    char * token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateTabs(token);
-    reg = GetRegID(token);
+    int8_t reg = GetRegID(token);
 
     if (reg == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
-    token = strtok(NULL, " ,[]/");
+    token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateComments(token); EliminateTabs(token);
-    reg2 = GetRegID(token);
+    int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
@@ -545,29 +508,25 @@ eErrorType COpcode::ProcessAND(tInstBlock* currentInst, char* linebuffer)
 
 eErrorType COpcode::ProcessModulus(tInstBlock* currentInst, char* linebuffer)
 {
-    int8_t reg;
-    int8_t reg2;
-    char * token;
-
-    currentInst[0].opcode = eOpcode::ALU;
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
     currentInst[0].alu_op = eALUOpcode::MODULUS;
     currentInst[0].always_1 = 1;
 
 
-    token = strtok(NULL, " ,[]/");
+    char * token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateTabs(token);
-    reg = GetRegID(token);
+    int8_t reg = GetRegID(token);
 
     if (reg == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
-    token = strtok(NULL, " ,[]/");
+    token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateComments(token); EliminateTabs(token);
-    reg2 = GetRegID(token);
+    int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
@@ -581,29 +540,25 @@ eErrorType COpcode::ProcessModulus(tInstBlock* currentInst, char* linebuffer)
 
 eErrorType COpcode::ProcessAdd(tInstBlock* currentInst, char* linebuffer)
 {
-    int8_t reg;
-    int8_t reg2;
-    char * token;
-
-    currentInst[0].opcode = eOpcode::ALU;
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
     currentInst[0].alu_op = eALUOpcode::ADD;
     currentInst[0].always_1 = 1;
 
 
-    token = strtok(NULL, " ,[]/");
+    char * token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateTabs(token);
-    reg = GetRegID(token);
+    int8_t reg = GetRegID(token);
 
     if (reg == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
-    token = strtok(NULL, " ,[]/");
+    token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateComments(token); EliminateTabs(token);
-    reg2 = GetRegID(token);
+    int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
@@ -617,29 +572,25 @@ eErrorType COpcode::ProcessAdd(tInstBlock* currentInst, char* linebuffer)
 
 eErrorType COpcode::ProcessSub(tInstBlock* currentInst, char* linebuffer)
 {
-    int8_t reg;
-    int8_t reg2;
-    char * token;
-
-    currentInst[0].opcode = eOpcode::ALU;
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
     currentInst[0].alu_op = eALUOpcode::SUB;
     currentInst[0].always_1 = 1;
 
 
-    token = strtok(NULL, " ,[]/");
+    char * token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateTabs(token);
-    reg = GetRegID(token);
+    int8_t reg = GetRegID(token);
 
     if (reg == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
-    token = strtok(NULL, " ,[]/");
+    token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateComments(token); EliminateTabs(token);
-    reg2 = GetRegID(token);
+    int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
@@ -652,28 +603,25 @@ eErrorType COpcode::ProcessSub(tInstBlock* currentInst, char* linebuffer)
 
 eErrorType COpcode::ProcessMul(tInstBlock* currentInst, char* linebuffer)
 {
-    int8_t reg;
-    int8_t reg2;
-    char * token;
-    currentInst[0].opcode = eOpcode::ALU;
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
     currentInst[0].alu_op = eALUOpcode::MUL;
     currentInst[0].always_1 = 1;
 
 
-    token = strtok(NULL, " ,[]/");
+    char * token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateTabs(token);
-    reg = GetRegID(token);
+    int8_t reg = GetRegID(token);
 
     if (reg == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
-    token = strtok(NULL, " ,[]/");
+    token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateComments(token); EliminateTabs(token);
-    reg2 = GetRegID(token);
+    int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
@@ -687,28 +635,25 @@ eErrorType COpcode::ProcessMul(tInstBlock* currentInst, char* linebuffer)
 
 eErrorType COpcode::ProcessDiv(tInstBlock* currentInst, char* linebuffer)
 {
-    int8_t reg;
-    int8_t reg2;
-    char * token;
-    currentInst[0].opcode = eOpcode::ALU;
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
     currentInst[0].alu_op = eALUOpcode::DIV;
     currentInst[0].always_1 = 1;
 
 
-    token = strtok(NULL, " ,[]/");
+    char * token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateTabs(token);
-    reg = GetRegID(token);
+    int8_t reg = GetRegID(token);
 
     if (reg == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
-    token = strtok(NULL, " ,[]/");
+    token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateComments(token); EliminateTabs(token);
-    reg2 = GetRegID(token);
+    int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
@@ -757,29 +702,25 @@ eErrorType COpcode::ProcessiAdd(tInstBlock* currentInst, char* linebuffer)
 
 eErrorType COpcode::ProcessiSub(tInstBlock* currentInst, char* linebuffer)
 {
-    int8_t reg;
-    int8_t reg2;
-    char * token;
-
-    currentInst[0].opcode = eOpcode::ALU;
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
     currentInst[0].alu_op = eALUOpcode::iSUB;
     currentInst[0].always_1 = 1;
 
 
-    token = strtok(NULL, " ,[]/");
+    char * token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateTabs(token);
-    reg = GetRegID(token);
+    int8_t reg = GetRegID(token);
 
     if (reg == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
-    token = strtok(NULL, " ,[]/");
+    token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateComments(token); EliminateTabs(token);
-    reg2 = GetRegID(token);
+    int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
@@ -827,28 +768,24 @@ eErrorType COpcode::ProcessiMul(tInstBlock* currentInst, char* linebuffer)
 
 eErrorType COpcode::ProcessiDiv(tInstBlock* currentInst, char* linebuffer)
 {
-    int8_t reg;
-    int8_t reg2;
-    char * token;
-
-    currentInst[0].opcode = eOpcode::ALU;
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
     currentInst[0].alu_op = eALUOpcode::iDIV;
     currentInst[0].always_1 = 1;
 
-    token = strtok(NULL, " ,[]/");
+    char * token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateTabs(token);
-    reg = GetRegID(token);
+    int8_t reg = GetRegID(token);
 
     if (reg == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
-    token = strtok(NULL, " ,[]/");
+    token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateComments(token); EliminateTabs(token);
-    reg2 = GetRegID(token);
+    int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
@@ -862,29 +799,25 @@ eErrorType COpcode::ProcessiDiv(tInstBlock* currentInst, char* linebuffer)
 
 eErrorType COpcode::ProcessCompare(tInstBlock* currentInst, char* linebuffer)
 {
-    int8_t reg;
-    int8_t reg2;
-    char * token;
-
-    currentInst[0].opcode = eOpcode::ALU;
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
     currentInst[0].alu_op = eALUOpcode::COMPARE;
     currentInst[0].always_1 = 1;
 
 
-    token = strtok(NULL, " ,[]/");
+    char * token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateTabs(token);
-    reg = GetRegID(token);
+    int8_t reg = GetRegID(token);
 
     if (reg == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
-    token = strtok(NULL, " ,[]/");
+    token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateComments(token); EliminateTabs(token);
-    reg2 = GetRegID(token);
+    int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
@@ -897,29 +830,25 @@ eErrorType COpcode::ProcessCompare(tInstBlock* currentInst, char* linebuffer)
 
 eErrorType COpcode::ProcessShiftLeft(tInstBlock* currentInst, char* linebuffer)
 {
-    int8_t reg;
-    int8_t reg2;
-    char * token;
-
-    currentInst[0].opcode = eOpcode::ALU;
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
     currentInst[0].alu_op = eALUOpcode::SHIFT_LEFT;
     currentInst[0].always_1 = 1;
 
 
-    token = strtok(NULL, " ,[]/");
+    char * token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateTabs(token);
-    reg = GetRegID(token);
+    int8_t reg = GetRegID(token);
 
     if (reg == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
-    token = strtok(NULL, " ,[]/");
+    token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateComments(token); EliminateTabs(token);
-    reg2 = GetRegID(token);
+    int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
@@ -932,29 +861,25 @@ eErrorType COpcode::ProcessShiftLeft(tInstBlock* currentInst, char* linebuffer)
 
 eErrorType COpcode::ProcessShiftRight(tInstBlock* currentInst, char* linebuffer)
 {
-    int8_t reg;
-    int8_t reg2;
-    char * token;
-
-    currentInst[0].opcode = eOpcode::ALU;
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
     currentInst[0].alu_op = eALUOpcode::SHIFT_RIGHT;
     currentInst[0].always_1 = 1;
 
 
-    token = strtok(NULL, " ,[]/");
+    char * token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateTabs(token);
-    reg = GetRegID(token);
+    int8_t reg = GetRegID(token);
 
     if (reg == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
-    token = strtok(NULL, " ,[]/");
+    token = strtok(nullptr, " ,[]/");
     logger(token);
     EliminateComments(token); EliminateTabs(token);
-    reg2 = GetRegID(token);
+    int8_t reg2 = GetRegID(token);
     logger(token);
     if (reg2 == -1)
     {

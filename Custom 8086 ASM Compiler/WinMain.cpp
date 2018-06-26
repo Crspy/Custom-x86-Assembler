@@ -1,27 +1,15 @@
 // compile with: /D_UNICODE /DUNICODE /DWIN32 /D_WINDOWS /c
+#include "WinMain.h"
 
-#include "stdafx.h"
-#include "resource.h"
-#include "8086_Assembler.h"
+TCHAR szWindowClass[] = L"Custom 8086 ASM Compiler";
 
-
-void ProcessOpenFileButton(HWND hWnd, WPARAM wParam, LPARAM lParam, HWND hwndOpenFileBtn, HWND hwnd_ed_u, wchar_t (*szFile)[WCHAR_MAX], wchar_t** pSelectedFileName);
-
-void ProcessCompileButton(HWND hWnd, WPARAM wParam, LPARAM lParam, HWND hwndCompileBtn, wchar_t** pSelectedFileName,BOOL* bSortInFolders);
-
-// Global variables
-
-// The main window class name.
-static TCHAR szWindowClass[] = L"Custom 8086 ASM Compiler";
-
-// The string that appears in the application's title bar.
-static TCHAR szTitle[] = L"Custom 8086 ASM Compiler";
+TCHAR szTitle[] = L"Custom 8086 ASM Compiler";
 
 HINSTANCE hInst;
 
+const wchar_t* FirstLoadedFileName = nullptr;
 
-// Forward declarations of functions included in this code module:
-LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+
 
 int CALLBACK WinMain(
     _In_ HINSTANCE hInstance,
@@ -29,30 +17,11 @@ int CALLBACK WinMain(
     _In_ LPSTR     lpCmdLine,
     _In_ int       nCmdShow
 )
-{
+{   
+
+    ProcessCmdLineCompilation(&FirstLoadedFileName);
+
     WNDCLASSEX wcex;
-
-
-    int argc = 0;
-    LPWSTR* argv = NULL;
-    LPCWSTR cmdline = GetCommandLine();
-    argv = CommandLineToArgvW(cmdline, &argc);
-    if (argc > 1)
-    {
-        for (int i = 1; i != argc; i++)
-        {
-            if (AllocConsole())
-            {
-                freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
-                freopen_s((FILE**)stdin, "CONIN$", "r", stdin);
-            }
-            BOOL bSortInFolders = TRUE;
-            ProcessCompile(argv[i],&bSortInFolders);
-        }
-
-    }
-
-
 
     wcex.cbSize = sizeof(WNDCLASSEX);
     wcex.style = CS_HREDRAW | CS_VREDRAW;
@@ -60,16 +29,16 @@ int CALLBACK WinMain(
     wcex.cbClsExtra = 0;
     wcex.cbWndExtra = 0;
     wcex.hInstance = hInstance;
-    wcex.hIcon = LoadIcon(hInstance, (LPCWSTR)IDI_ICON1);
-    wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-    wcex.lpszMenuName = NULL;
+    wcex.hIcon = LoadIcon(hInstance, LPCWSTR(IDI_ICON1));
+    wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    wcex.hbrBackground = HBRUSH(COLOR_WINDOW + 1);
+    wcex.lpszMenuName = nullptr;
     wcex.lpszClassName = szWindowClass;
-    wcex.hIconSm = LoadIcon(wcex.hInstance, (LPCWSTR)IDI_ICON1);
+    wcex.hIconSm = LoadIcon(wcex.hInstance, LPCWSTR(IDI_ICON1));
 
     if (!RegisterClassEx(&wcex))
     {
-        MessageBox(NULL,
+        MessageBox(nullptr,
             L"Call to RegisterClassEx failed!",
             L"Error",
             MB_OK);
@@ -106,7 +75,7 @@ int CALLBACK WinMain(
 
     if (!hWnd)
     {
-        MessageBox(NULL,
+        MessageBox(nullptr,
             L"Call to CreateWindow failed!",
             L"Error",
             MB_OK);
@@ -121,14 +90,16 @@ int CALLBACK WinMain(
         nCmdShow);
     UpdateWindow(hWnd);
 
+    
+
     // Main message loop:
     MSG msg;
-    while (GetMessage(&msg, NULL, 0, 0))
+    while (GetMessage(&msg, nullptr, 0, 0))
     {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-    return (int)msg.wParam;
+    return int(msg.wParam);
 }
 
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
@@ -143,11 +114,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     PAINTSTRUCT ps;
     HDC hdc;
     TCHAR greeting[] = L"Welcome to 8086 ASM Compiler";
-    static HWND hwndOpenFileBtn = NULL;
-    static HWND hwndCompileBtn = NULL;
-    static HWND hwnd_st_u = NULL, hwnd_ed_u = NULL;
-    static wchar_t* SelectedFileName = NULL;
-    static HWND hWndCheckBox = NULL;
+    static HWND hwndOpenFileBtn = nullptr;
+    static HWND hwndCompileBtn = nullptr;
+    static HWND hwnd_st_u = nullptr, hwnd_ed_u = nullptr;
+    static wchar_t* SelectedFileName = nullptr;
+    static HWND hWndCheckBox = nullptr;
     wchar_t szFile[WCHAR_MAX];       // buffer for file name
 
 
@@ -160,8 +131,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         hWndCheckBox = CreateWindow(L"button",L"Sort In Folders",
             WS_VISIBLE | WS_CHILD | BS_CHECKBOX,
-            10, 100, 185, 35,
-            hWnd, (HMENU)1, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
+            10, 120, 185, 35,
+            hWnd, HMENU(1), hInst, NULL);
         CheckDlgButton(hWnd, 1, BST_CHECKED);
 
         hwndOpenFileBtn = CreateWindow(
@@ -174,7 +145,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             50,        // Button height
             hWnd,     // Parent window
             NULL,       // No menu.
-            (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
+            hInst,
             NULL);
 
         hwndCompileBtn = CreateWindow(
@@ -187,17 +158,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             50,        // Button height
             hWnd,     // Parent window
             NULL,       // No menu.
-            (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
+            hInst,
             NULL);
 
-        int x, w, y, h;
-        y = 60; h = 20;
-        x = 5; w = 60;
+        int y = 60; int h = 20;
+        int x = 5; int w = 60;
         hwnd_st_u = CreateWindow(L"static", L"ST_U",
             WS_CHILD | WS_VISIBLE | WS_TABSTOP,
             x, y, w, h,
-            hWnd, (HMENU)(501),
-            (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), NULL);
+            hWnd, HMENU(501),
+            hInst, NULL);
         SetWindowText(hwnd_st_u, L"FilePath:");
 
         x += w; w = 300;
@@ -205,10 +175,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             WS_CHILD | WS_VISIBLE | WS_TABSTOP
             | ES_AUTOHSCROLL | WS_BORDER,
             x, y, w, h,
-            hWnd, (HMENU)(502),
-            (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), NULL);
-        SetWindowText(hwnd_ed_u, L"");
-        //GetWindowText()
+            hWnd, HMENU(502),
+            hInst, NULL);
+
+        if (FirstLoadedFileName == nullptr)
+            SetWindowText(hwnd_ed_u, L"");
+        else
+            SetWindowText(hwnd_ed_u, FirstLoadedFileName);
 
         break;
     }
@@ -216,13 +189,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
 
 
-        if (((HWND)lParam == hwndOpenFileBtn) && (LOWORD(wParam) == BN_CLICKED))
+        if ((HWND(lParam) == hwndOpenFileBtn) && (LOWORD(wParam) == BN_CLICKED))
             ProcessOpenFileButton(hWnd, wParam, lParam, hwndOpenFileBtn, hwnd_ed_u, &szFile, &SelectedFileName);
 
-        else if (((HWND)lParam == hwndCompileBtn) && (LOWORD(wParam) == BN_CLICKED))
-            ProcessCompileButton(hWnd, wParam, lParam, hwndCompileBtn, &SelectedFileName, &bSortInFolders);
+        else if ((HWND(lParam) == hwndCompileBtn) && (LOWORD(wParam) == BN_CLICKED))
+            ProcessCompileButton(hWnd, wParam, lParam, hwndCompileBtn, &SelectedFileName, bSortInFolders);
 
-        else if ((HWND)lParam == hWndCheckBox) 
+        else if (HWND(lParam) == hWndCheckBox) 
         {
             if (IsDlgButtonChecked(hWnd, 1))
             {
@@ -235,7 +208,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 bSortInFolders = true;
             }
         }
-
         break;
     }
     case WM_PAINT:
@@ -256,7 +228,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
-        break;
     }
 
     return 0;
@@ -279,9 +250,9 @@ void ProcessOpenFileButton(HWND hWnd, WPARAM wParam, LPARAM lParam, HWND hwndOpe
     ofn.nMaxFile = WCHAR_MAX;
     ofn.lpstrFilter = L"All\0*.*\0ASM\0*.asm\0";
     ofn.nFilterIndex = 1;
-    ofn.lpstrFileTitle = NULL;
+    ofn.lpstrFileTitle = nullptr;
     ofn.nMaxFileTitle = 0;
-    ofn.lpstrInitialDir = NULL;
+    ofn.lpstrInitialDir = nullptr;
     ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
     // Display the Open dialog box. 
@@ -301,17 +272,39 @@ void ProcessOpenFileButton(HWND hWnd, WPARAM wParam, LPARAM lParam, HWND hwndOpe
 
 }
 
-void ProcessCompileButton(HWND hWnd, WPARAM wParam, LPARAM lParam, HWND hwndCompileBtn, wchar_t** pSelectedFileName,BOOL* bSortInFolders)
+void ProcessCompileButton(HWND hWnd, WPARAM wParam, LPARAM lParam, HWND hwndCompileBtn, wchar_t** pSelectedFileName,BOOL bSortInFolders)
 {
-    if (*pSelectedFileName == NULL ||  IsBlankLine(*pSelectedFileName))
+    if (*pSelectedFileName == nullptr ||  is_blank_line(*pSelectedFileName))
         MessageBox(hWnd, L"Please Browse the file path first !", L"Error", MB_OK);
     else
     {
         if (AllocConsole())
         {
-            _wfreopen_s((FILE**)stdout, L"CONOUT$", L"w", stdout);
-            _wfreopen_s((FILE**)stdin, L"CONIN$", L"r", stdin);
+            _wfreopen(L"CONOUT$", L"w", stdout);
+            _wfreopen(L"CONIN$", L"r", stdin);
         }
         ProcessCompile(*pSelectedFileName,bSortInFolders);
+    }
+}
+
+
+void ProcessCmdLineCompilation(const wchar_t** pFirstLoadedFileName)
+{
+    int argc = 0;
+
+    LPWSTR* argv = CommandLineToArgvW(GetCommandLine(), &argc);
+
+    if (argc > 1)
+    {
+        for (int i = 1; i != argc; i++)
+        {
+            if (AllocConsole())
+            {
+                _wfreopen(L"CONOUT$", L"w", stdout);
+                _wfreopen(L"CONIN$", L"r", stdin);
+            }
+            ProcessCompile(argv[i], TRUE);
+        }
+        *pFirstLoadedFileName = argv[argc - 1];
     }
 }

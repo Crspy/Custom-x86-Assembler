@@ -24,9 +24,10 @@ struct tMemAddress
 
     bool InsureMovAddress()
     {
-        if (this->m_Address > (0xFFFF - 1))   return false; // we can't read 2 bytes after 0xFFFF from the dataseg so max is 0xFFFE
+        if (this->m_Address > (32768 - 1))   
+            return false; // we can't read 2 bytes after 0xFFFF from the dataseg so max is 0xFFFE
 
-        this->m_Address += 0x10000; // to access the data segment , so we prevent the user from acccessing
+        this->m_Address += 0x8000; // to access the data segment 
 
         this->m_bNeedLoading = (this->m_Address > 0xFF) ? true : false; // will always be true anyway
 
@@ -42,11 +43,9 @@ struct tMemAddress
         return true;
     }
 
-    bool InsureDataAddress()
+    bool InsureDataAddress() const
     {
-        if (this->m_Address > (32768 - 1))   return false;
-
-        return true;
+        return (this->m_Address > 32768 - 1) ? false : true;
     }
 
 };

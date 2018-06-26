@@ -56,6 +56,9 @@
     <ClInclude Include="tMemAddress.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="WinMain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Custom 8086 ASM Compiler.rc">
@@ -63,7 +66,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\Win32Project1\Win32Project1\Icon.ico">
+    <Image Include="icon.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

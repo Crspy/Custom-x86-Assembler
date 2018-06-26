@@ -105,8 +105,6 @@ public:
     static eErrorType ProcessJump(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
         std::map<std::string, uint32_t>& jmplabelsmap, std::map<std::string, uint32_t>& labelsmap/*, std::map<uint32_t, tMemAddress>& memaddressesMap*/);
 
-    static eErrorType ProcessCompare(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
-        std::map<std::string, uint32_t>& jmplabelsmap, std::map<std::string, uint32_t>& labelsmap);
 
 
 };
