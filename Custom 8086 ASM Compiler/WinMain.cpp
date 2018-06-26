@@ -142,7 +142,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     static BOOL bSortInFolders = true;
     PAINTSTRUCT ps;
     HDC hdc;
-    TCHAR greeting[] = L"Hello, Welcome to 8086 ASM Compiler";
+    TCHAR greeting[] = L"Welcome to 8086 ASM Compiler";
     static HWND hwndOpenFileBtn = NULL;
     static HWND hwndCompileBtn = NULL;
     static HWND hwnd_st_u = NULL, hwnd_ed_u = NULL;
@@ -160,7 +160,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         hWndCheckBox = CreateWindow(L"button",L"Sort In Folders",
             WS_VISIBLE | WS_CHILD | BS_CHECKBOX,
-            20, 20, 185, 35,
+            10, 100, 185, 35,
             hWnd, (HMENU)1, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
         CheckDlgButton(hWnd, 1, BST_CHECKED);
 
@@ -192,7 +192,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         int x, w, y, h;
         y = 60; h = 20;
-        x = 1; w = 60;
+        x = 5; w = 60;
         hwnd_st_u = CreateWindow(L"static", L"ST_U",
             WS_CHILD | WS_VISIBLE | WS_TABSTOP,
             x, y, w, h,
@@ -218,23 +218,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         if (((HWND)lParam == hwndOpenFileBtn) && (LOWORD(wParam) == BN_CLICKED))
             ProcessOpenFileButton(hWnd, wParam, lParam, hwndOpenFileBtn, hwnd_ed_u, &szFile, &SelectedFileName);
+
         else if (((HWND)lParam == hwndCompileBtn) && (LOWORD(wParam) == BN_CLICKED))
             ProcessCompileButton(hWnd, wParam, lParam, hwndCompileBtn, &SelectedFileName, &bSortInFolders);
-        else if (IsDlgButtonChecked(hWnd, 1)) {
-            CheckDlgButton(hWnd, 1, BST_UNCHECKED);
-            bSortInFolders = false;
+
+        else if ((HWND)lParam == hWndCheckBox) 
+        {
+            if (IsDlgButtonChecked(hWnd, 1))
+            {
+                CheckDlgButton(hWnd, 1, BST_UNCHECKED);
+                bSortInFolders = false;
+            }
+            else
+            {
+                CheckDlgButton(hWnd, 1, BST_CHECKED);
+                bSortInFolders = true;
+            }
         }
-        else {
-            CheckDlgButton(hWnd, 1, BST_CHECKED);
-            bSortInFolders = true;
-        }
+
         break;
     }
     case WM_PAINT:
         hdc = BeginPaint(hWnd, &ps);
 
         // Here your application is laid out.
-        // For this introduction, we just print out "Hello, Windows desktop!"
+        // For this introduction, we just print out "Windows desktop!"
         // in the top left corner.
         TextOut(hdc,
             5, 5,
@@ -295,7 +303,7 @@ void ProcessOpenFileButton(HWND hWnd, WPARAM wParam, LPARAM lParam, HWND hwndOpe
 
 void ProcessCompileButton(HWND hWnd, WPARAM wParam, LPARAM lParam, HWND hwndCompileBtn, wchar_t** pSelectedFileName,BOOL* bSortInFolders)
 {
-    if (*pSelectedFileName == NULL)
+    if (*pSelectedFileName == NULL ||  IsBlankLine(*pSelectedFileName))
         MessageBox(hWnd, L"Please Browse the file path first !", L"Error", MB_OK);
     else
     {
