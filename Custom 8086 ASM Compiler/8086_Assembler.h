@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "COpcode.h"
 #include "CROMBlock.h"
+#include "CBranching.h"
 
 #define MAX_PC 32767
 

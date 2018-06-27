@@ -308,58 +308,6 @@ eErrorType COpcode::ProcessIndirectMoveIN(tMemAddress* memadd, tInstBlock* curre
     return eErrorType::NO_ERROR_DETECTED;
 }
 
-eErrorType COpcode::ProcessJump(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
-    std::map<std::string, uint32_t>& jmplabelsmap, std::map<std::string, uint32_t>& labelsmap/*, std::map<uint32_t, tMemAddress>& memaddressesMap*/)
-{
-    currentInst[0].opcode = eOpcode::JUMP;
-
-
-    char * token = strtok(nullptr, " [], \t");
-    logger(token);
-    EliminateComments(token); EliminateTabs(token);
-    logger(token);
-    if (is_numbers_only(token))
-    {
-        //logger("Numbers ONLY");
-        memadd->m_Address = strtol(token, nullptr, 0);
-        logger(token);
-        if (!memadd->InsureJmpAddress())
-        {
-            return eErrorType::MEM_ADDRESS_EXCEEDS;
-        }
-        if (memadd->m_bNeedLoading)
-        {
-            currentInst[1].address = memadd->byte0; // lowbyte for mov
-            currentInst[1].opcode = currentInst[0].opcode;
-           // currentInst[1].dir_flag = currentInst[0].dir_flag;
-            currentInst[0].opcode = eOpcode::LOAD;
-            //currentInst[0].dir_flag = 0;  
-            currentInst[0].address = memadd->byte1; // highbyte for load
-        }
-        else
-        {
-            
-            currentInst[0].address = memadd->byte0;           
-        }
-    }
-    else if (is_alpha_only(token)) 
-    {
-        //logger("ALPHA ONLY");
-        //std::cin.get();
-        memadd->m_bNeedLoading = true; // needs loading by default 
-        currentInst[1].opcode = currentInst[0].opcode;
-        currentInst[0].opcode = eOpcode::LOAD;
-        std::string jmplabel(token);
-        jmplabelsmap.insert(std::pair<std::string, uint32_t>(jmplabel, PC));
-    }
-    else
-    {
-        return eErrorType::ONLY_ADDRESSES_OR_LABELS_ALLOWED;
-
-    }
-    return eErrorType::NO_ERROR_DETECTED;
-}
-
 
 eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentInst, std::string& line, uint32_t PC,
         std::map<std::string, uint32_t>& constDataLabelsMap,bool* bMovingData, CROMBlock* myrom)

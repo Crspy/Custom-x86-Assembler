@@ -21,9 +21,10 @@ enum eOpcode : uint8_t
     INDIRECT_IN = 4,
     INDIRECT_OUT = INDIRECT_IN,
     //place holders
-    JUMP = 5,
     ALU = 6,
-    CMP
+    UNCOND_JUMP = 7,
+    COND_JUMP = 8,
+    RETURN = 9
     
 };
 
@@ -96,6 +97,7 @@ public:
     static eErrorType ProcessiSub(tInstBlock* currentInst, char* linebuffer);
     //static eErrorType ProcessiMul(tInstBlock* currentInst, char* linebuffer);
     static eErrorType ProcessiDiv(tInstBlock* currentInst, char* linebuffer);
+
     static bool ProcessALUOpcodes(char* opToken, tInstBlock* currentInst, char* linebuff, eErrorType* errortype);
 
 
@@ -105,8 +107,7 @@ public:
     static eErrorType ProcessConstData(tMemAddress* memadd, tInstBlock* currentInst, std::string& line, uint32_t PC,
         std::map<std::string, uint32_t>& datalabelsmap,bool* bMovingData, CROMBlock* myrom);
 
-    static eErrorType ProcessJump(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
-        std::map<std::string, uint32_t>& jmplabelsmap, std::map<std::string, uint32_t>& labelsmap/*, std::map<uint32_t, tMemAddress>& memaddressesMap*/);
+    
 
 
 

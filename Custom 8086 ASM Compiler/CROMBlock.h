@@ -22,7 +22,17 @@ public:
             uint16_t not_important : 1; // yet
             uint16_t reg2ALU_id : 2;
         };
+
+        struct
+        {   
+            uint16_t jmp_Flag : 2;
+            uint16_t IfCheck_Flag : 1;
+            uint16_t const_condJump_opcode : 5; // always 8
+            
+            uint16_t JMPaddress : 8;
+        };
     };
+
     tInstBlock()
     {
         memset(this, 0, sizeof(tInstBlock));

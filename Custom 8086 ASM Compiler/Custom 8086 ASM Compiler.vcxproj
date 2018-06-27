@@ -151,11 +151,13 @@
     <ClCompile Include="8086_Assembler.cpp" />
     <ClCompile Include="COpcode.cpp" />
     <ClCompile Include="ErrorHandler.cpp" />
+    <ClCompile Include="CBranching.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="8086_Assembler.h" />
+    <ClInclude Include="CBranching.h" />
     <ClInclude Include="COpcode.h" />
     <ClInclude Include="CROMBlock.h" />
     <ClInclude Include="ErrorHandler.h" />
