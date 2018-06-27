@@ -388,13 +388,12 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
     char * token = strtok(linebuff, "= \t");
     EliminateTabs(token);
     constDataLabelsMap.insert(std::pair<std::string,uint32_t>(token,DataCounter));
-    char * token2 = strtok(nullptr, "= \t");
-    EliminateComments(token);
 
+    char * token2 = strtok(nullptr, "= \t");
+    bool bShiftPhase = false;
     char* pch = strtok(token2,",");
-    bool bShifting = false;
-    while (pch != NULL)
-    {
+    while (pch != NULL && *pch != ' ')
+    {    
         if (strchr(pch,'\"'))
         {
             char* token3 = strtok(pch, "\"\"");
@@ -429,7 +428,7 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
             }
             logger(token3);
         }
-        else if (is_numbers_only(pch))
+        else if (EliminateComments(pch),EliminateTabs(pch),is_numbers_only(pch))
         {
             
             long lvalue = strtol(pch, nullptr, 0);
@@ -463,15 +462,15 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
             constDataLabelsMap.erase(token);
         }
 
-        if (bShifting)
+        if (bShiftPhase)
         {
             pch = strtok(pch,",");
-            bShifting = false;
+            bShiftPhase = false;
         }
         else
         {
             pch = strtok(nullptr,",");
-            bShifting = true;
+            bShiftPhase = true;
         }
     }
 
@@ -995,7 +994,7 @@ eErrorType COpcode::ProcessShiftLeft(tInstBlock* currentInst, char* linebuffer)
 
     char * token = strtok(nullptr, " ,[]/");
     logger(token);
-    EliminateTabs(token);
+    EliminateComments(token); EliminateTabs(token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
@@ -1003,16 +1002,7 @@ eErrorType COpcode::ProcessShiftLeft(tInstBlock* currentInst, char* linebuffer)
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
-    token = strtok(nullptr, " ,[]/");
-    logger(token);
-    EliminateComments(token); EliminateTabs(token);
-    int8_t reg2 = GetRegID(token);
-    if (reg2 == -1)
-    {
-        return eErrorType::UNKNOWN_REG_NAME;
-    }
     currentInst[0].regALU_id = reg;
-    currentInst[0].reg2ALU_id = reg2;
 
     return eErrorType::NO_ERROR_DETECTED;
 }
@@ -1026,7 +1016,7 @@ eErrorType COpcode::ProcessShiftRight(tInstBlock* currentInst, char* linebuffer)
 
     char * token = strtok(nullptr, " ,[]/");
     logger(token);
-    EliminateTabs(token);
+    EliminateComments(token); EliminateTabs(token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
@@ -1034,17 +1024,8 @@ eErrorType COpcode::ProcessShiftRight(tInstBlock* currentInst, char* linebuffer)
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
-    token = strtok(nullptr, " ,[]/");
-    logger(token);
-    EliminateComments(token); EliminateTabs(token);
-    int8_t reg2 = GetRegID(token);
-    logger(token);
-    if (reg2 == -1)
-    {
-        return eErrorType::UNKNOWN_REG_NAME;
-    }
     currentInst[0].regALU_id = reg;
-    currentInst[0].reg2ALU_id = reg2;
+
 
     return eErrorType::NO_ERROR_DETECTED;
 }
