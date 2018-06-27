@@ -25,7 +25,7 @@ struct tMemAddress
     bool InsureMovAddress()
     {
         if (this->m_Address > (32768 - 1))   
-            return false; // we can't read 2 bytes after 0xFFFF from the dataseg so max is 0xFFFE
+            return false; 
 
         this->m_Address += 0x8000; // to access the data segment 
 

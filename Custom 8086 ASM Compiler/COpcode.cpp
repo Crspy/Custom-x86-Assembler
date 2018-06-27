@@ -44,18 +44,30 @@ void COpcode::EliminateTabs(char* line)
     }
 }
 
-eOpcodeDir COpcode::GetOpcodeDir(std::string line)
+eOpcodeDir COpcode::GetOpcodeDir(std::string& line)
 {
-    std::stringstream ss(line);
-    std::getline(ss, line, ',');
-    if (line.find('[') != std::string::npos)
+    //std::stringstream ss(line);
+    //std::getline(ss, line, ',');
+    char* linebuff = static_cast<char*>(malloc(line.capacity())); // new linebuff because the old one is destroyed in tokenization
+    strcpy(linebuff, line.c_str());
+    char* token = strtok(linebuff,",");
+
+    EliminateComments(token);  
+
+    if (strchr(token,'['))
+    {
+        free(linebuff);
         return eOpcodeDir::DIR_OUT;
-    else
-        return eOpcodeDir::DIR_IN;
+    }
+
+    free(linebuff);
+    return eOpcodeDir::DIR_IN;
+
 }
 
 
-eErrorType COpcode::ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer)
+eErrorType COpcode::ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer,
+    std::map<std::string, uint32_t>& constDataMovLabelsMap,uint32_t PC)
 {
     currentInst[0].opcode = eOpcode::MOVE_IN;
 
@@ -79,24 +91,36 @@ eErrorType COpcode::ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, 
         return eErrorType::USING_REGNAME_INSTEAD_OF_ADDRESS;
     }
 
-    memadd->m_Address = strtol(token, nullptr, 0);
-
-    if (!memadd->InsureMovAddress())
+    if (is_numbers_only(token))
     {
-        return eErrorType::MEM_ADDRESS_EXCEEDS;
-    }
-    if (memadd->m_bNeedLoading)
-    {
-        currentInst[1].address = memadd->byte0; // lowbyte for mov
-        currentInst[1].opcode = currentInst[0].opcode;
-        currentInst[1].dir_flag = currentInst[0].dir_flag;
-        currentInst[0].opcode = eOpcode::LOAD;
-        currentInst[0].dir_flag = eOpcodeDir::DIR_IN; // DirFlag for Loading is 0
-        currentInst[0].address = memadd->byte1; // highbyte for load
+        memadd->m_Address = strtol(token, nullptr, 0);
+    
+        if (!memadd->InsureMovAddress())
+        {
+            return eErrorType::MEM_ADDRESS_EXCEEDS;
+        }
+        if (memadd->m_bNeedLoading)
+        {
+            currentInst[1].address = memadd->byte0; // lowbyte for mov
+            currentInst[1].opcode = currentInst[0].opcode;
+            currentInst[1].dir_flag = currentInst[0].dir_flag;
+            currentInst[0].opcode = eOpcode::LOAD;
+            currentInst[0].dir_flag = eOpcodeDir::DIR_IN; // DirFlag for Loading is 0
+            currentInst[0].address = memadd->byte1; // highbyte for load
+        }
+        else
+        {
+            currentInst[0].address = memadd->byte0;
+        }
     }
     else
     {
-        currentInst[0].address = memadd->byte0;
+        constDataMovLabelsMap.insert(std::pair<std::string,uint32_t>(token,PC));
+        memadd->m_bNeedLoading = true; // because the address will be always >= 0x8000
+        currentInst[0].opcode = eOpcode::LOAD;
+        currentInst[0].dir_flag = eOpcodeDir::DIR_IN; // DirFlag for Loading is 0
+        currentInst[1].opcode = currentInst[0].opcode;
+        currentInst[1].dir_flag = currentInst[0].dir_flag;
     }
 
 
@@ -109,7 +133,7 @@ eErrorType COpcode::ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, 
 
 
 eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer,
-    bool* bMovingData, CROMBlock* myrom)
+    bool* bMovingData, CROMBlock* myrom,std::map<std::string, uint32_t>& constDataMovLabelsMap,uint32_t PC)
 {
     currentInst[0].opcode = eOpcode::MOVE_OUT;
     currentInst[0].dir_flag = eOpcodeDir::DIR_OUT;
@@ -134,22 +158,36 @@ eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst,
 
     if (reg != -1)
     {
-        if (!memadd->InsureMovAddress())
+        if (is_numbers_only(token))
         {
-            return eErrorType::MEM_ADDRESS_EXCEEDS;
-        }
-        if (memadd->m_bNeedLoading)
-        {
-            currentInst[1].address = memadd->byte0; // lowbyte for mov
-            currentInst[1].opcode = currentInst[0].opcode;
-            currentInst[1].dir_flag = currentInst[0].dir_flag;
-            currentInst[0].opcode = eOpcode::LOAD;
-            currentInst[0].dir_flag = 0;
-            currentInst[0].address = memadd->byte1; // highbyte for load
+            memadd->m_Address = strtol(token, nullptr, 0);
+        
+            if (!memadd->InsureMovAddress())
+            {
+                return eErrorType::MEM_ADDRESS_EXCEEDS;
+            }
+            if (memadd->m_bNeedLoading)
+            {
+                currentInst[1].address = memadd->byte0; // lowbyte for mov
+                currentInst[1].opcode = currentInst[0].opcode;
+                currentInst[1].dir_flag = currentInst[0].dir_flag;
+                currentInst[0].opcode = eOpcode::LOAD;
+                currentInst[0].dir_flag = eOpcodeDir::DIR_IN; // DirFlag for Loading is 0
+                currentInst[0].address = memadd->byte1; // highbyte for load
+            }
+            else
+            {
+                currentInst[0].address = memadd->byte0;
+            }
         }
         else
         {
-            currentInst[0].address = memadd->byte0;
+            constDataMovLabelsMap.insert(std::pair<std::string,uint32_t>(token,PC));
+            memadd->m_bNeedLoading = true; // because the address will be always >= 0x8000
+            currentInst[1].opcode = currentInst[0].opcode;
+            currentInst[1].dir_flag = currentInst[0].dir_flag;
+            currentInst[0].opcode = eOpcode::LOAD;
+            currentInst[0].dir_flag = eOpcodeDir::DIR_IN; // DirFlag for Loading is 0
         }
     }
     else // then it's moving value to dataSeg
@@ -190,7 +228,7 @@ eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst,
                     const int16_t svalue = lvalue;
                     // swapping endianess
                     *(reinterpret_cast<char*>(&myrom->DataSeg[memadd->m_Address].value) + 1) = *((char*)&svalue);
-                    *reinterpret_cast<char*>(&myrom->DataSeg[memadd->m_Address].value) = *(((char*)& svalue + 1));
+                    *reinterpret_cast<char*>(&myrom->DataSeg[memadd->m_Address].value) = *(((char*)&svalue + 1));
                 }
                 else
                     return eErrorType::DATA_VALUE_OUTOFBOUNDS;
@@ -200,7 +238,7 @@ eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst,
                 const uint16_t usvalue = lvalue;
                 // swapping endianess
                 *(reinterpret_cast<char*>(&myrom->DataSeg[memadd->m_Address].value) + 1) = *(((char*)&usvalue));
-                *reinterpret_cast<char*>(&myrom->DataSeg[memadd->m_Address].value) = *(((char*)& usvalue + 1));
+                *reinterpret_cast<char*>(&myrom->DataSeg[memadd->m_Address].value) = *(((char*)&usvalue + 1));
             }
 
         }
@@ -322,6 +360,111 @@ eErrorType COpcode::ProcessJump(tMemAddress* memadd, tInstBlock* currentInst, ch
     return eErrorType::NO_ERROR_DETECTED;
 }
 
+
+eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentInst, std::string& line, uint32_t PC,
+        std::map<std::string, uint32_t>& constDataLabelsMap,bool* bMovingData, CROMBlock* myrom)
+{
+
+    static uint32_t DataCounter = 0;
+
+    /*
+    auto PutStringInDataSeg = [](char* token,CROMBlock* myrom)
+    {
+        auto toklen = strlen(token);
+        for(int i = 0 ; i != toklen; i++)
+        {
+            const uint16_t usvalue = token[i];
+            // swapping endianess
+            *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(((char*)&usvalue));
+            *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *(((char*)& usvalue + 1));
+            DataCounter++;
+        }
+    };
+    */
+    *bMovingData = true;
+    char* linebuff = static_cast<char*>(malloc(line.capacity())); // new linebuff because the old one is destroyed in tokenization
+    strcpy(linebuff, line.c_str());
+
+    char * token = strtok(linebuff, "= \t");
+    EliminateTabs(token);
+    constDataLabelsMap.insert(std::pair<std::string,uint32_t>(token,DataCounter));
+    char * token2 = strtok(nullptr, "= \t");
+    EliminateComments(token); EliminateTabs(token);
+
+    if (strchr(token2,'\"'))
+    {
+        char* token3 = strtok(token2, "\"\"");
+        auto toklen = strlen(token3);
+        logger(toklen);
+        for(int i = 0 ; i < toklen; i++)
+        {
+            int16_t usvalue = token3[i];
+            logger(usvalue);
+            // swapping endianess
+            printf("DataCount : %d\n",DataCounter);
+            *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(((char*)&usvalue));
+            *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *(((char*)& usvalue + 1));
+            DataCounter++;
+        }
+        logger(token3);
+    }
+    else if (strchr(token2,'\''))
+    {
+        char* token3 = strtok(token2, "''");
+        auto toklen = strlen(token3);
+        logger(toklen);
+        for(int i = 0 ; i < toklen; i++)
+        {
+            int16_t usvalue = token3[i];
+            logger(usvalue);
+            // swapping endianess
+            printf("DataCount : %d\n",DataCounter);
+            *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(char*)&usvalue;
+            *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *((char*)& usvalue + 1);
+            DataCounter++;
+        }
+        logger(token3);
+    }
+    else if (is_numbers_only(token2))
+    {
+        
+        long lvalue = strtol(token2, nullptr, 0);
+        if (lvalue < 0) // negative number
+        {
+            if (lvalue >= -32768)
+            {
+                const int16_t svalue = lvalue;
+                // swapping endianess
+                *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(char*)&svalue;
+                *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *((char*)& svalue + 1);
+            }
+            else
+                return eErrorType::DATA_VALUE_OUTOFBOUNDS;
+        }
+        else if (lvalue <= 0xFFFF)  // zero or positive number 
+        {
+            
+            const uint16_t usvalue = lvalue;
+            // swapping endianess
+            printf("%d\n",lvalue);
+            *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(char*)&usvalue;
+            *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *((char*)& usvalue + 1);
+        }
+        else
+            return eErrorType::DATA_VALUE_OUTOFBOUNDS;
+        DataCounter++;
+    }
+    else
+    {   // don't add blank data declarations to the map
+        constDataLabelsMap.erase(token);
+    }
+
+
+    
+    free(linebuff);
+    return eErrorType::NO_ERROR_DETECTED;
+}
+
 eErrorType COpcode::ProcessNot(tInstBlock* currentInst, char* linebuffer)
 {
     currentInst[0].const_ALU_opcode = eOpcode::ALU;
@@ -329,7 +472,7 @@ eErrorType COpcode::ProcessNot(tInstBlock* currentInst, char* linebuffer)
     currentInst[0].always_1 = 1;
 
 
-    char * token = strtok(nullptr, " ,[]/");
+    char * token = strtok(nullptr, " [], \t");
     printf(token);
     EliminateComments(token); EliminateTabs(token);
     int8_t reg = GetRegID(token);

@@ -64,12 +64,13 @@ public:
 
     static int8_t GetRegID(const char* lineReg);
 
-    static eOpcodeDir GetOpcodeDir(std::string line);
+    static eOpcodeDir GetOpcodeDir(std::string& line);
 
     static eErrorType ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer,
-        bool* bMovingData, CROMBlock* myrom);
+        bool* bMovingData, CROMBlock* myrom,std::map<std::string, uint32_t>& constDataMovLabelsMap,uint32_t PC);
     
-    static eErrorType ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer);
+    static eErrorType ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer,
+        std::map<std::string, uint32_t>& constDataMovLabelsMap,uint32_t PC);
 
     static eErrorType ProcessIndirectMoveOUT(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer);
 
@@ -101,6 +102,8 @@ public:
 
 
     //place holders
+    static eErrorType ProcessConstData(tMemAddress* memadd, tInstBlock* currentInst, std::string& line, uint32_t PC,
+        std::map<std::string, uint32_t>& datalabelsmap,bool* bMovingData, CROMBlock* myrom);
 
     static eErrorType ProcessJump(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
         std::map<std::string, uint32_t>& jmplabelsmap, std::map<std::string, uint32_t>& labelsmap/*, std::map<uint32_t, tMemAddress>& memaddressesMap*/);
