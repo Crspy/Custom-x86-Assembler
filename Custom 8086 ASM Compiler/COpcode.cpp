@@ -389,76 +389,91 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
     EliminateTabs(token);
     constDataLabelsMap.insert(std::pair<std::string,uint32_t>(token,DataCounter));
     char * token2 = strtok(nullptr, "= \t");
-    EliminateComments(token); EliminateTabs(token);
+    EliminateComments(token);
 
-    if (strchr(token2,'\"'))
+    char* pch = strtok(token2,",");
+    bool bShifting = false;
+    while (pch != NULL)
     {
-        char* token3 = strtok(token2, "\"\"");
-        auto toklen = strlen(token3);
-        logger(toklen);
-        for(int i = 0 ; i < toklen; i++)
+        if (strchr(pch,'\"'))
         {
-            int16_t usvalue = token3[i];
-            logger(usvalue);
-            // swapping endianess
-            printf("DataCount : %d\n",DataCounter);
-            *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(((char*)&usvalue));
-            *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *(((char*)& usvalue + 1));
-            DataCounter++;
-        }
-        logger(token3);
-    }
-    else if (strchr(token2,'\''))
-    {
-        char* token3 = strtok(token2, "''");
-        auto toklen = strlen(token3);
-        logger(toklen);
-        for(int i = 0 ; i < toklen; i++)
-        {
-            int16_t usvalue = token3[i];
-            logger(usvalue);
-            // swapping endianess
-            printf("DataCount : %d\n",DataCounter);
-            *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(char*)&usvalue;
-            *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *((char*)& usvalue + 1);
-            DataCounter++;
-        }
-        logger(token3);
-    }
-    else if (is_numbers_only(token2))
-    {
-        
-        long lvalue = strtol(token2, nullptr, 0);
-        if (lvalue < 0) // negative number
-        {
-            if (lvalue >= -32768)
+            char* token3 = strtok(pch, "\"\"");
+            auto toklen = strlen(token3); // string length without the nullterm
+            logger(toklen);
+            for(int i = 0 ; i <= toklen; i++)
             {
-                const int16_t svalue = lvalue;
+                int16_t usvalue = token3[i];
+                logger(usvalue);
                 // swapping endianess
-                *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(char*)&svalue;
-                *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *((char*)& svalue + 1);
+                printf("DataCount : %d\n",DataCounter);
+                *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(((char*)&usvalue));
+                *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *(((char*)& usvalue + 1));
+                DataCounter++;
+            }
+            logger(token3);
+        }
+        else if (strchr(pch,'\''))
+        {
+            char* token3 = strtok(pch, "''");
+            auto toklen = strlen(token3);
+            logger(toklen);
+            for(int i = 0 ; i < toklen; i++)
+            {
+                int16_t usvalue = token3[i];
+                logger(usvalue);
+                // swapping endianess
+                printf("DataCount : %d\n",DataCounter);
+                *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(char*)&usvalue;
+                *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *((char*)& usvalue + 1);
+                DataCounter++;
+            }
+            logger(token3);
+        }
+        else if (is_numbers_only(pch))
+        {
+            
+            long lvalue = strtol(pch, nullptr, 0);
+            if (lvalue < 0) // negative number
+            {
+                if (lvalue >= -32768)
+                {
+                    const int16_t svalue = lvalue;
+                    // swapping endianess
+                    *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(char*)&svalue;
+                    *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *((char*)& svalue + 1);
+                }
+                else
+                    return eErrorType::DATA_VALUE_OUTOFBOUNDS;
+            }
+            else if (lvalue <= 0xFFFF)  // zero or positive number 
+            {
+                
+                const uint16_t usvalue = lvalue;
+                // swapping endianess
+                printf("%d\n",lvalue);
+                *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(char*)&usvalue;
+                *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *((char*)& usvalue + 1);
             }
             else
                 return eErrorType::DATA_VALUE_OUTOFBOUNDS;
-        }
-        else if (lvalue <= 0xFFFF)  // zero or positive number 
-        {
-            
-            const uint16_t usvalue = lvalue;
-            // swapping endianess
-            printf("%d\n",lvalue);
-            *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(char*)&usvalue;
-            *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *((char*)& usvalue + 1);
+            DataCounter++;
         }
         else
-            return eErrorType::DATA_VALUE_OUTOFBOUNDS;
-        DataCounter++;
-    }
-    else
-    {   // don't add blank data declarations to the map
-        constDataLabelsMap.erase(token);
-    }
+        {   // don't add blank data declarations to the map
+            constDataLabelsMap.erase(token);
+        }
 
+        if (bShifting)
+        {
+            pch = strtok(pch,",");
+            bShifting = false;
+        }
+        else
+        {
+            pch = strtok(nullptr,",");
+            bShifting = true;
+        }
+    }
 
     
     free(linebuff);
