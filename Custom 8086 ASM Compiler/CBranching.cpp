@@ -2,10 +2,13 @@
 
 
 
-eErrorType CBranching::ProcessUnCondJump(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
-    std::map<std::string, uint32_t>& jmplabelsmap)
+eErrorType CBranching::ProcessUnCondJumpAndCall(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
+    std::map<std::string, uint32_t>& jmplabelsmap, bool bIsCall)
 {
-    currentInst[0].opcode = eOpcode::UNCOND_JUMP;
+    if (bIsCall)
+        currentInst[0].opcode = eOpcode::CALL;
+    else
+        currentInst[0].opcode = eOpcode::UNCOND_JUMP;
 
 
     char * token = strtok(nullptr, " [], \t");
@@ -355,10 +358,15 @@ bool CBranching::ProcessBranchingOpcodes(char * opToken, tMemAddress * memadd, t
     eErrorType * errortype, uint32_t PC, std::map<std::string, uint32_t>& jmplabelsmap,bool* bDoubleJmp)
 {
     
-    if (strcmp(opToken, "jmp") == 0)
+    if (strcmp(opToken, "call") == 0)
     {
         logger("FOUND A JUMP");
-        *errortype = CBranching::ProcessUnCondJump(memadd, currentInst, linebuff, PC, jmplabelsmap);
+        *errortype = CBranching::ProcessUnCondJumpAndCall(memadd, currentInst, linebuff, PC, jmplabelsmap , true);
+    }
+    else if (strcmp(opToken, "jmp") == 0)
+    {
+        logger("FOUND A JUMP");
+        *errortype = CBranching::ProcessUnCondJumpAndCall(memadd, currentInst, linebuff, PC, jmplabelsmap , false);
     }
     else if (strcmp(opToken, "je") == 0)
     {

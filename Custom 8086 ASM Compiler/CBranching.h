@@ -21,8 +21,8 @@ enum eCheckFlag
 class CBranching
 {
 public:
-    static eErrorType ProcessUnCondJump(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
-        std::map<std::string, uint32_t>& jmplabelsmap);
+    static eErrorType ProcessUnCondJumpAndCall(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
+        std::map<std::string, uint32_t>& jmplabelsmap, bool bIsCall);
 
     static eErrorType ProcessJumpIfZero(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
         std::map<std::string, uint32_t>& jmplabelsmap,eCheckFlag checkflag);

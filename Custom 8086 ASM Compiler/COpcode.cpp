@@ -160,7 +160,7 @@ eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst,
 
     int8_t reg = GetRegID(token2);
 
-    if (reg != -1)
+    if (reg != -1) // moving from ram to reg
     {
         logger(token);
         if (is_numbers_only(token))
@@ -205,16 +205,15 @@ eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst,
 
         long lvalue;
 
-        try
+        if (is_numbers_only(token2))
         {
             lvalue = strtol(token2, nullptr, 0);
             logger("VALUE");
             logger(lvalue);
         }
-        catch (std::exception& e)
+        else
         {
-            std::cout << e.what() << "\n";
-            return eErrorType::UNKNOWN_REG_NAME;
+            return eErrorType::UNKNOWN_REG_NAME; // maybe the user made a typo in the reg name
         }
 
         if (lvalue > 0xFFFF)
@@ -435,6 +434,48 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
 
     
     free(linebuff);
+    return eErrorType::NO_ERROR_DETECTED;
+}
+
+eErrorType COpcode::ProcessInstOut(tInstBlock * currentInst, char * linebuffer)
+{
+    currentInst[0].opcode = eOpcode::INSTRUCTION_OUT;
+    currentInst[0].dir_flag = eOpcodeDir::DIR_OUT;
+
+
+    char * token = strtok(nullptr, " ,[]/");
+    logger(token);
+    EliminateComments(token); EliminateTabs(token);
+    int8_t reg = GetRegID(token);
+
+    if (reg == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+
+    currentInst[0].reg_id = reg;
+
+    return eErrorType::NO_ERROR_DETECTED;
+}
+
+eErrorType COpcode::ProcessDataOut(tInstBlock * currentInst, char * linebuffer)
+{
+    currentInst[0].opcode = eOpcode::DATA_OUT;
+    currentInst[0].dir_flag = eOpcodeDir::DIR_OUT;
+
+
+    char * token = strtok(nullptr, " ,[]/");
+    logger(token);
+    EliminateComments(token); EliminateTabs(token);
+    int8_t reg = GetRegID(token);
+
+    if (reg == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+
+    currentInst[0].reg_id = reg;
+
     return eErrorType::NO_ERROR_DETECTED;
 }
 
