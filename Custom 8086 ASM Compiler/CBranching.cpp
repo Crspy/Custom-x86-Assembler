@@ -136,12 +136,18 @@ eErrorType CBranching::ProcessJumpIfGreater(tMemAddress * memadd, tInstBlock * c
     currentInst[0].jmp_Flag = eJumpFlag::FLAG_ZF;
     currentInst[1].const_condJump_opcode = eOpcode::COND_JUMP;
     currentInst[1].jmp_Flag = eJumpFlag::FLAG_SF;
-    currentInst[1].IfCheck_Flag = 0;
+    
 
     if (checkflag == eCheckFlag::FLAG_IF_TRUE)
-        currentInst[0].IfCheck_Flag = 0;
-    else
+    {
         currentInst[0].IfCheck_Flag = 1;
+        currentInst[1].IfCheck_Flag = 0;
+    }
+    else
+    {
+        currentInst[0].IfCheck_Flag = 0;
+        currentInst[1].IfCheck_Flag = 1;
+    }
 
 
     tMemAddress nextJmpAddress(PC + 2);
@@ -173,20 +179,13 @@ eErrorType CBranching::ProcessJumpIfGreater(tMemAddress * memadd, tInstBlock * c
             currentInst[1].const_condJump_opcode = currentInst[0].const_condJump_opcode;
             currentInst[1].IfCheck_Flag = currentInst[0].IfCheck_Flag;
             currentInst[1].jmp_Flag = currentInst[0].jmp_Flag;
-
-            if (checkflag == eCheckFlag::FLAG_IF_TRUE)
-                currentInst[1].JMPaddress = nextJmpAddress.byte0; // lowbyte for mov
-            else
-                currentInst[1].JMPaddress = memadd->byte0; // lowbyte for mov
+            currentInst[1].JMPaddress = nextJmpAddress.byte0; // lowbyte for mov
 
             // for loading
             currentInst[0].reg_id = 0;
             currentInst[0].dir_flag = 0; 
             currentInst[0].opcode = eOpcode::LOAD;
-            if (checkflag == eCheckFlag::FLAG_IF_TRUE)
-                currentInst[0].address = nextJmpAddress.byte1; // highbyte for load
-            else
-                currentInst[0].address = memadd->byte1; // highbyte for load
+            currentInst[0].address = nextJmpAddress.byte1; // highbyte for load
 
             currentInst[2].reg_id = 0;
             currentInst[2].dir_flag = 0; 
@@ -197,39 +196,31 @@ eErrorType CBranching::ProcessJumpIfGreater(tMemAddress * memadd, tInstBlock * c
     else if (is_alpha_only(token)) 
     {
 
-        memadd->m_bNeedLoading = true; // needs loading by default 
+       memadd->m_bNeedLoading = true; // needs loading by default 
 
-        currentInst[3].const_condJump_opcode = currentInst[1].const_condJump_opcode;
-        currentInst[3].IfCheck_Flag = currentInst[1].IfCheck_Flag;
-        currentInst[3].jmp_Flag = currentInst[1].jmp_Flag;
+       currentInst[3].const_condJump_opcode = currentInst[1].const_condJump_opcode;
+       currentInst[3].IfCheck_Flag = currentInst[1].IfCheck_Flag;
+       currentInst[3].jmp_Flag = currentInst[1].jmp_Flag;
 
-        currentInst[1].const_condJump_opcode = currentInst[0].const_condJump_opcode;
-        currentInst[1].IfCheck_Flag = currentInst[0].IfCheck_Flag;
-        currentInst[1].jmp_Flag = currentInst[0].jmp_Flag;
+       currentInst[1].const_condJump_opcode = currentInst[0].const_condJump_opcode;
+       currentInst[1].IfCheck_Flag = currentInst[0].IfCheck_Flag;
+       currentInst[1].jmp_Flag = currentInst[0].jmp_Flag;
+       currentInst[1].JMPaddress = nextJmpAddress.byte0; // lowbyte for mov
 
-        if (checkflag == eCheckFlag::FLAG_IF_TRUE)
-            currentInst[1].JMPaddress = nextJmpAddress.byte0; // lowbyte for mov
+       // for loading
+       currentInst[0].reg_id = 0;
+       currentInst[0].dir_flag = 0; 
+       currentInst[0].opcode = eOpcode::LOAD;
+       currentInst[0].address = nextJmpAddress.byte1; // highbyte for load
 
-
-        // for loading
-        currentInst[0].reg_id = 0;
-        currentInst[0].dir_flag = 0; 
-        currentInst[0].opcode = eOpcode::LOAD;
-        if (checkflag == eCheckFlag::FLAG_IF_TRUE)
-            currentInst[0].address = nextJmpAddress.byte1; // highbyte for load
-
-        currentInst[2].reg_id = 0;
-        currentInst[2].dir_flag = 0; 
-        currentInst[2].opcode = eOpcode::LOAD;
+       currentInst[2].reg_id = 0;
+       currentInst[2].dir_flag = 0; 
+       currentInst[2].opcode = eOpcode::LOAD;
         
 
         std::string jmplabel(token);
 
         jmplabelsmap.insert(std::pair<std::string, uint32_t>(jmplabel, PC + 2));
-        if (checkflag != eCheckFlag::FLAG_IF_TRUE)
-        {
-            jmplabelsmap.insert(std::pair<std::string, uint32_t>(jmplabel, PC));
-        }
     }
     else
     {
@@ -246,13 +237,18 @@ eErrorType CBranching::ProcessJumpIfLess(tMemAddress * memadd, tInstBlock * curr
     currentInst[0].jmp_Flag = eJumpFlag::FLAG_ZF;
     currentInst[1].const_condJump_opcode = eOpcode::COND_JUMP;
     currentInst[1].jmp_Flag = eJumpFlag::FLAG_SF;
-    currentInst[1].IfCheck_Flag = 1;
+    
 
     if (checkflag == eCheckFlag::FLAG_IF_TRUE)
-        currentInst[0].IfCheck_Flag = 0;
-    else
+    {
         currentInst[0].IfCheck_Flag = 1;
-
+        currentInst[1].IfCheck_Flag = 1;
+    }
+    else
+    {
+        currentInst[0].IfCheck_Flag = 0;
+        currentInst[1].IfCheck_Flag = 0;
+    }
 
     tMemAddress nextJmpAddress(PC + 2);
     nextJmpAddress.InsureJmpAddress();
@@ -283,20 +279,13 @@ eErrorType CBranching::ProcessJumpIfLess(tMemAddress * memadd, tInstBlock * curr
             currentInst[1].const_condJump_opcode = currentInst[0].const_condJump_opcode;
             currentInst[1].IfCheck_Flag = currentInst[0].IfCheck_Flag;
             currentInst[1].jmp_Flag = currentInst[0].jmp_Flag;
-
-            if (checkflag == eCheckFlag::FLAG_IF_TRUE)
-                currentInst[1].JMPaddress = nextJmpAddress.byte0; // lowbyte for mov
-            else
-                currentInst[1].JMPaddress = memadd->byte0; // lowbyte for mov
+            currentInst[1].JMPaddress = nextJmpAddress.byte0; // lowbyte for mov
 
             // for loading
             currentInst[0].reg_id = 0;
             currentInst[0].dir_flag = 0; 
             currentInst[0].opcode = eOpcode::LOAD;
-            if (checkflag == eCheckFlag::FLAG_IF_TRUE)
-                currentInst[0].address = nextJmpAddress.byte1; // highbyte for load
-            else
-                currentInst[0].address = memadd->byte1; // highbyte for load
+            currentInst[0].address = nextJmpAddress.byte1; // highbyte for load
 
             currentInst[2].reg_id = 0;
             currentInst[2].dir_flag = 0; 
@@ -312,34 +301,28 @@ eErrorType CBranching::ProcessJumpIfLess(tMemAddress * memadd, tInstBlock * curr
         currentInst[3].const_condJump_opcode = currentInst[1].const_condJump_opcode;
         currentInst[3].IfCheck_Flag = currentInst[1].IfCheck_Flag;
         currentInst[3].jmp_Flag = currentInst[1].jmp_Flag;
+        currentInst[3].JMPaddress = memadd->byte0; // lowbyte for mov
 
         currentInst[1].const_condJump_opcode = currentInst[0].const_condJump_opcode;
         currentInst[1].IfCheck_Flag = currentInst[0].IfCheck_Flag;
         currentInst[1].jmp_Flag = currentInst[0].jmp_Flag;
-
-        if (checkflag == eCheckFlag::FLAG_IF_TRUE)
-            currentInst[1].JMPaddress = nextJmpAddress.byte0; // lowbyte for mov
-
+        currentInst[1].JMPaddress = nextJmpAddress.byte0; // lowbyte for mov
 
         // for loading
         currentInst[0].reg_id = 0;
         currentInst[0].dir_flag = 0; 
         currentInst[0].opcode = eOpcode::LOAD;
-        if (checkflag == eCheckFlag::FLAG_IF_TRUE)
-            currentInst[0].address = nextJmpAddress.byte1; // highbyte for load
+        currentInst[0].address = nextJmpAddress.byte1; // highbyte for load
 
         currentInst[2].reg_id = 0;
         currentInst[2].dir_flag = 0; 
         currentInst[2].opcode = eOpcode::LOAD;
+        currentInst[2].address = memadd->byte1; // highbyte for load
         
 
         std::string jmplabel(token);
 
         jmplabelsmap.insert(std::pair<std::string, uint32_t>(jmplabel, PC + 2));
-        if (checkflag != eCheckFlag::FLAG_IF_TRUE)
-        {
-            jmplabelsmap.insert(std::pair<std::string, uint32_t>(jmplabel, PC));
-        }
     }
     else
     {

@@ -141,8 +141,6 @@ eErrorType COpcode::ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, 
 eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer,
     bool* bMovingData, CROMBlock* myrom,std::map<std::string, uint32_t>& constDataMovLabelsMap,uint32_t PC)
 {
-    bool bFirstOperandIsAddress = false;
-
     currentInst[0].opcode = eOpcode::MOVE_OUT;
     currentInst[0].dir_flag = eOpcodeDir::DIR_OUT;
 
