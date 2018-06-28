@@ -54,19 +54,11 @@ public:
                 {
                     struct
                     {
-                        uint16_t reg_id : 2;
-                        uint16_t dir_flag : 1; // 0 - in  ,  1 - out
-                        uint16_t opcode : 5;
-                        uint16_t address : 8;
+                        uint8_t InstHigh;
+                        uint8_t InstLow;
                     };
-                    struct
-                    {   // place holder for ALU instructions
-                        uint16_t alu_op : 5;
-                        uint16_t reg2ALU_id : 2;
-                        uint16_t Always_1 : 1;
-                    };
-                    uint8_t InstHigh;
-                    uint8_t InstLow;
+
+                    tInstBlock instblock;
                 };
             } Inst[32768]; // 32768 byte low  and 32768 high
 
@@ -88,18 +80,8 @@ public:
         // just to access all possible memory addresses directly
         struct
         {
-            union
-            {
-                struct
-                {
-                    int16_t value;                 
-                };
-                struct
-                {
-                    int8_t RomSegHigh;
-                    int8_t RomSegLow;
-                };
-            };
+            int8_t RomSegHigh;
+            int8_t RomSegLow;
         } RomSeg[32768 * 2]; // 65536 byte low and 65536 high
 
     };
@@ -111,10 +93,7 @@ public:
 
     static void SetRomInst(tInstBlock* dst, tInstBlock* src)
     {
-        dst->opcode = src->opcode;
-        dst->dir_flag = src->dir_flag;
-        dst->reg_id = src->reg_id;
-        dst->address = src->address;
+        memcpy(dst,src,sizeof(tInstBlock));
     }
 
 };
@@ -162,17 +141,8 @@ public:
 
         // just to access all possible memory addresses directly
         struct
-        {
-            union
-            {
-                struct
-                {         
-                    int8_t value_high;
-                    
-                };
+        {                  
                 int8_t RomHighByte;
-            };
-
         } RomSeg[32768 * 2]; // 65536 byte high
 
     };

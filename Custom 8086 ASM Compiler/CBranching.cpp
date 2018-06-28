@@ -144,7 +144,7 @@ eErrorType CBranching::ProcessJumpIfGreater(tMemAddress * memadd, tInstBlock * c
         currentInst[0].IfCheck_Flag = 1;
 
 
-    tMemAddress nextJmpAddress((PC * 2) + 4);
+    tMemAddress nextJmpAddress(PC + 2);
     nextJmpAddress.InsureJmpAddress();
 
     char * token = strtok(nullptr, " [], \t");
@@ -254,7 +254,7 @@ eErrorType CBranching::ProcessJumpIfLess(tMemAddress * memadd, tInstBlock * curr
         currentInst[0].IfCheck_Flag = 1;
 
 
-    tMemAddress nextJmpAddress((PC * 2) + 4);
+    tMemAddress nextJmpAddress(PC + 2);
     nextJmpAddress.InsureJmpAddress();
 
     char * token = strtok(nullptr, " [], \t");

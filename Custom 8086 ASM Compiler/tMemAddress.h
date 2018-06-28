@@ -5,7 +5,7 @@ struct tMemAddress
 {
     union
     {
-        uint32_t m_Address;
+        uint32_t m_Address = 0;
         struct
         {
             uint8_t byte0;

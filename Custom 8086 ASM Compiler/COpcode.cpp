@@ -83,18 +83,20 @@ eErrorType COpcode::ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, 
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
-    token = strtok(nullptr, " ,[]/");
-    logger(token);
-    EliminateComments(token); EliminateTabs(token);
-    if (GetRegID(token) >= 0)
+    char* token2 = strtok(nullptr, " ,[]/");
+    logger(token2);
+    EliminateComments(token2); EliminateTabs(token2);
+    if (GetRegID(token2) >= 0)
     {
         return eErrorType::USING_REGNAME_INSTEAD_OF_ADDRESS;
     }
 
-    if (is_numbers_only(token))
+    if (is_numbers_only(token2))
     {
-        memadd->m_Address = strtol(token, nullptr, 0);
-    
+        memadd->m_Address = strtol(token2, nullptr, 0);
+
+        printf("MOVEINADDRESS:%d\n",memadd->m_Address);
+
         if (!memadd->InsureMovAddress())
         {
             return eErrorType::MEM_ADDRESS_EXCEEDS;
@@ -105,8 +107,10 @@ eErrorType COpcode::ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, 
             currentInst[1].opcode = currentInst[0].opcode;
             currentInst[1].dir_flag = currentInst[0].dir_flag;
             currentInst[0].opcode = eOpcode::LOAD;
+            currentInst[0].reg_id = 0;
             currentInst[0].dir_flag = eOpcodeDir::DIR_IN; // DirFlag for Loading is 0
             currentInst[0].address = memadd->byte1; // highbyte for load
+            
         }
         else
         {
@@ -115,12 +119,14 @@ eErrorType COpcode::ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, 
     }
     else
     {
-        constDataMovLabelsMap.insert(std::pair<std::string,uint32_t>(token,PC));
-        memadd->m_bNeedLoading = true; // because the address will be always >= 0x8000
-        currentInst[0].opcode = eOpcode::LOAD;
-        currentInst[0].dir_flag = eOpcodeDir::DIR_IN; // DirFlag for Loading is 0
+        constDataMovLabelsMap.insert(std::pair<std::string,uint32_t>(token2,PC));
+        memadd->m_bNeedLoading = true; // because the address will be always >= 0x8000        
         currentInst[1].opcode = currentInst[0].opcode;
         currentInst[1].dir_flag = currentInst[0].dir_flag;
+        currentInst[0].opcode = eOpcode::LOAD;
+        currentInst[0].reg_id = 0;
+        currentInst[0].dir_flag = eOpcodeDir::DIR_IN; // DirFlag for Loading is 0
+        
     }
 
 
@@ -135,33 +141,33 @@ eErrorType COpcode::ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, 
 eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer,
     bool* bMovingData, CROMBlock* myrom,std::map<std::string, uint32_t>& constDataMovLabelsMap,uint32_t PC)
 {
+    bool bFirstOperandIsAddress = false;
+
     currentInst[0].opcode = eOpcode::MOVE_OUT;
     currentInst[0].dir_flag = eOpcodeDir::DIR_OUT;
 
     char * token = strtok(nullptr, " [], \t");
-    logger(token);
     EliminateTabs(token);
+
     if (GetRegID(token) >= 0)
     {
         return eErrorType::USING_REGNAME_INSTEAD_OF_ADDRESS;
 
     }
-
     memadd->m_Address = strtol(token, nullptr, 0);
-    logger(memadd->m_Address);
 
-    token = strtok(nullptr, " [], \t");
+    char *token2 = strtok(nullptr, " [], \t");
     
-    EliminateComments(token); EliminateTabs(token);
+    EliminateComments(token2); EliminateTabs(token2);
 
-    int8_t reg = GetRegID(token);
+    int8_t reg = GetRegID(token2);
 
     if (reg != -1)
     {
+        logger(token);
         if (is_numbers_only(token))
         {
-            memadd->m_Address = strtol(token, nullptr, 0);
-        
+                   
             if (!memadd->InsureMovAddress())
             {
                 return eErrorType::MEM_ADDRESS_EXCEEDS;
@@ -172,6 +178,7 @@ eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst,
                 currentInst[1].opcode = currentInst[0].opcode;
                 currentInst[1].dir_flag = currentInst[0].dir_flag;
                 currentInst[0].opcode = eOpcode::LOAD;
+                currentInst[0].reg_id = 0;
                 currentInst[0].dir_flag = eOpcodeDir::DIR_IN; // DirFlag for Loading is 0
                 currentInst[0].address = memadd->byte1; // highbyte for load
             }
@@ -187,6 +194,7 @@ eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst,
             currentInst[1].opcode = currentInst[0].opcode;
             currentInst[1].dir_flag = currentInst[0].dir_flag;
             currentInst[0].opcode = eOpcode::LOAD;
+            currentInst[0].reg_id = 0;
             currentInst[0].dir_flag = eOpcodeDir::DIR_IN; // DirFlag for Loading is 0
         }
     }
@@ -201,7 +209,7 @@ eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst,
 
         try
         {
-            lvalue = strtol(token, nullptr, 0);
+            lvalue = strtol(token2, nullptr, 0);
             logger("VALUE");
             logger(lvalue);
         }
@@ -227,8 +235,8 @@ eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst,
                 {
                     const int16_t svalue = lvalue;
                     // swapping endianess
-                    *(reinterpret_cast<char*>(&myrom->DataSeg[memadd->m_Address].value) + 1) = *((char*)&svalue);
-                    *reinterpret_cast<char*>(&myrom->DataSeg[memadd->m_Address].value) = *(((char*)&svalue + 1));
+                    *(reinterpret_cast<char*>(&myrom->DataSeg[memadd->m_Address].value) + 1) = *(char*)&svalue;
+                    *reinterpret_cast<char*>(&myrom->DataSeg[memadd->m_Address].value) = *((char*)&svalue + 1);
                 }
                 else
                     return eErrorType::DATA_VALUE_OUTOFBOUNDS;
@@ -237,8 +245,8 @@ eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst,
             {
                 const uint16_t usvalue = lvalue;
                 // swapping endianess
-                *(reinterpret_cast<char*>(&myrom->DataSeg[memadd->m_Address].value) + 1) = *(((char*)&usvalue));
-                *reinterpret_cast<char*>(&myrom->DataSeg[memadd->m_Address].value) = *(((char*)&usvalue + 1));
+                *(reinterpret_cast<char*>(&myrom->DataSeg[memadd->m_Address].value) + 1) = *(char*)&usvalue;
+                *reinterpret_cast<char*>(&myrom->DataSeg[memadd->m_Address].value) = *((char*)&usvalue + 1);
             }
 
         }
@@ -334,14 +342,18 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
     strcpy(linebuff, line.c_str());
 
     char * token = strtok(linebuff, "= \t");
+    logger(token);
     EliminateTabs(token);
     constDataLabelsMap.insert(std::pair<std::string,uint32_t>(token,DataCounter));
 
     char * token2 = strtok(nullptr, "= \t");
+    logger(token2);
     bool bShiftPhase = false;
     char* pch = strtok(token2,",");
-    while (pch != NULL && *pch != ' ')
+    logger(pch);
+    while (pch != nullptr)
     {    
+        printf("pch:>%s<\n",pch);
         if (strchr(pch,'\"'))
         {
             char* token3 = strtok(pch, "\"\"");
@@ -378,8 +390,9 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
         }
         else if (EliminateComments(pch),EliminateTabs(pch),is_numbers_only(pch))
         {
-            
+            logger(pch);
             long lvalue = strtol(pch, nullptr, 0);
+            printf("lvalue>%ld<\n", lvalue);
             if (lvalue < 0) // negative number
             {
                 if (lvalue >= -32768)
@@ -398,8 +411,12 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
                 const uint16_t usvalue = lvalue;
                 // swapping endianess
                 printf("%d\n",lvalue);
+                printf("usvalue high>%d<\n", *(char*)&usvalue);
+                printf("usvalue low>%d<\n",*((char*)& usvalue + 1));
                 *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(char*)&usvalue;
                 *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *((char*)& usvalue + 1);
+                printf("DataSegValue: %d\n",*(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1));
+                printf("DataSegValue: %d\n",*(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value)));
             }
             else
                 return eErrorType::DATA_VALUE_OUTOFBOUNDS;
@@ -411,15 +428,11 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
         }
 
         if (bShiftPhase)
-        {
-            pch = strtok(pch,",");
-            bShiftPhase = false;
-        }
+            pch = strtok(pch,",");           
         else
-        {
             pch = strtok(nullptr,",");
-            bShiftPhase = true;
-        }
+
+        bShiftPhase = !bShiftPhase;
     }
 
     
