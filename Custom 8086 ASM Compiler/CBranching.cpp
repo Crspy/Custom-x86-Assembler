@@ -360,83 +360,83 @@ bool CBranching::ProcessBranchingOpcodes(char * opToken, tMemAddress * memadd, t
     eErrorType * errortype, uint32_t PC, std::map<uint32_t , std::string>& jmplabelsmap,bool* bDoubleJmp)
 {
     
-    if (strcmp(opToken, "call") == 0)
+    if (strcmpi(opToken, "call") == 0)
     {
         logger("FOUND A JUMP");
         *errortype = CBranching::ProcessUnCondJumpAndCall(memadd, currentInst, linebuff, PC, jmplabelsmap , true);
     }
-    else if (strcmp(opToken, "jmp") == 0)
+    else if (strcmpi(opToken, "jmp") == 0)
     {
         logger("FOUND A JUMP");
         *errortype = CBranching::ProcessUnCondJumpAndCall(memadd, currentInst, linebuff, PC, jmplabelsmap , false);
     }
-    else if (strcmp(opToken, "je") == 0)
+    else if (strcmpi(opToken, "je") == 0)
     {
         logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfEqual(memadd, currentInst, linebuff, PC, jmplabelsmap, 
             eCheckFlag::FLAG_IF_TRUE);
     }
-    else if (strcmp(opToken, "jne") == 0)
+    else if (strcmpi(opToken, "jne") == 0)
     {
         logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfEqual(memadd, currentInst, linebuff, PC, jmplabelsmap,eCheckFlag::FLAG_IF_NOT);
     }
-    else if (strcmp(opToken, "jz") == 0)
+    else if (strcmpi(opToken, "jz") == 0)
     {
         logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfZero(memadd, currentInst, linebuff, PC, jmplabelsmap,eCheckFlag::FLAG_IF_TRUE);
     }
-    else if (strcmp(opToken, "jnz") == 0)
+    else if (strcmpi(opToken, "jnz") == 0)
     {
         logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfZero(memadd, currentInst, linebuff, PC, jmplabelsmap,eCheckFlag::FLAG_IF_NOT);
     }
-    else if (strcmp(opToken, "jo") == 0)
+    else if (strcmpi(opToken, "jo") == 0)
     {
         logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfOverFlow(memadd, currentInst, linebuff, PC, jmplabelsmap,eCheckFlag::FLAG_IF_TRUE);
     }
-    else if (strcmp(opToken, "jno") == 0)
+    else if (strcmpi(opToken, "jno") == 0)
     {
         logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfOverFlow(memadd, currentInst, linebuff, PC, jmplabelsmap, eCheckFlag::FLAG_IF_NOT);
     }
-    else if (strcmp(opToken, "js") == 0)
+    else if (strcmpi(opToken, "js") == 0)
     {
         logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfSigned(memadd, currentInst, linebuff, PC, jmplabelsmap, eCheckFlag::FLAG_IF_TRUE);
     }
-    else if (strcmp(opToken, "jns") == 0)
+    else if (strcmpi(opToken, "jns") == 0)
     {
         logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfSigned(memadd, currentInst, linebuff, PC, jmplabelsmap, eCheckFlag::FLAG_IF_NOT);
     }
-    else if (strcmp(opToken, "jg") == 0)
+    else if (strcmpi(opToken, "jg") == 0)
     {
         logger("FOUND A JUMP");
         *bDoubleJmp = true;
         *errortype = CBranching::ProcessJumpIfGreater(memadd, currentInst, linebuff, PC, jmplabelsmap, eCheckFlag::FLAG_IF_TRUE);
     }
-    else if (strcmp(opToken, "jge") == 0)
+    else if (strcmpi(opToken, "jge") == 0)
     {
         logger("FOUND A JUMP");
         *bDoubleJmp = true;
         *errortype = CBranching::ProcessJumpIfGreater(memadd, currentInst, linebuff, PC, jmplabelsmap, eCheckFlag::FLAG_IF_TRUE_OR_EQUAL);
     }
-    else if (strcmp(opToken, "jl") == 0)
+    else if (strcmpi(opToken, "jl") == 0)
     {
         logger("FOUND A JUMP");
         *bDoubleJmp = true;
         *errortype = CBranching::ProcessJumpIfLess(memadd, currentInst, linebuff, PC, jmplabelsmap, eCheckFlag::FLAG_IF_TRUE);
     }
-    else if (strcmp(opToken, "jle") == 0)
+    else if (strcmpi(opToken, "jle") == 0)
     {
         logger("FOUND A JUMP");
         *bDoubleJmp = true;
         *errortype = CBranching::ProcessJumpIfLess(memadd, currentInst, linebuff, PC, jmplabelsmap, eCheckFlag::FLAG_IF_TRUE_OR_EQUAL);
 
     }
-    else if (strcmp(opToken, "ret") == 0)
+    else if (strcmpi(opToken, "ret") == 0)
     {
         *errortype = CBranching::ProcessReturn(currentInst);
     }

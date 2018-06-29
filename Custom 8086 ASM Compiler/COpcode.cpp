@@ -10,13 +10,13 @@
 
 int8_t COpcode::GetRegID(const char* lineReg)
 {
-    if (strcmp(lineReg, "ax") == 0)
+    if (strcmpi(lineReg, "ax") == 0)
         return eRegID::AX;
-    else if (strcmp(lineReg, "bx") == 0)
+    else if (strcmpi(lineReg, "bx") == 0)
         return eRegID::BX;
-    else if (strcmp(lineReg, "cx") == 0)
+    else if (strcmpi(lineReg, "cx") == 0)
         return eRegID::CX;
-    else if (strcmp(lineReg, "dx") == 0)
+    else if (strcmpi(lineReg, "dx") == 0)
         return eRegID::DX;
     else
         return -1;
@@ -1052,87 +1052,87 @@ eErrorType COpcode::ProcessShiftRight(tInstBlock* currentInst, char* linebuffer)
 
 bool COpcode::ProcessALUOpcodes(char* opToken,tInstBlock* currentInst, char* linebuff,eErrorType* errortype)
 {
-    if (strcmp(opToken, "add") == 0)
+    if (strcmpi(opToken, "add") == 0)
     {
         *errortype = COpcode::ProcessAdd(currentInst, linebuff);
     }
-    else if (strcmp(opToken, "not") == 0)
+    else if (strcmpi(opToken, "not") == 0)
     {
         *errortype = COpcode::ProcessNot(currentInst, linebuff);
     }
     /*
-    else if (strcmp(opToken, "trans") == 0)
+    else if (strcmpi(opToken, "trans") == 0)
     {
         errortype = COpcode::ProcessTransfer(currentInst, linebuff);
     }
     */
-    else if (strcmp(opToken, "inc") == 0)
+    else if (strcmpi(opToken, "inc") == 0)
     {
         *errortype = COpcode::ProcessInc(currentInst, linebuff);
     }
-    else if (strcmp(opToken, "dec") == 0)
+    else if (strcmpi(opToken, "dec") == 0)
     {
         *errortype = COpcode::ProcessDec(currentInst, linebuff);
     }
-    else if (strcmp(opToken, "xor") == 0)
+    else if (strcmpi(opToken, "xor") == 0)
     {
         *errortype = COpcode::ProcessXor(currentInst, linebuff);
     }
-    else if (strcmp(opToken, "or") == 0)
+    else if (strcmpi(opToken, "or") == 0)
     {
         *errortype = COpcode::ProcessOR(currentInst, linebuff);
     }
-    else if (strcmp(opToken, "and") == 0)
+    else if (strcmpi(opToken, "and") == 0)
     {
         *errortype = COpcode::ProcessAND(currentInst, linebuff);
     }
-    else if (strcmp(opToken, "mod") == 0)
+    else if (strcmpi(opToken, "mod") == 0)
     {
         *errortype = COpcode::ProcessModulus(currentInst, linebuff);
     }
-    else if (strcmp(opToken, "sub") == 0)
+    else if (strcmpi(opToken, "sub") == 0)
     {
         *errortype = COpcode::ProcessSub(currentInst, linebuff);
     }
-    else if (strcmp(opToken, "mul") == 0)
+    else if (strcmpi(opToken, "mul") == 0)
     {
         *errortype = COpcode::ProcessMul(currentInst, linebuff);
     }
-    else if (strcmp(opToken, "div") == 0)
+    else if (strcmpi(opToken, "div") == 0)
     {
         *errortype = COpcode::ProcessDiv(currentInst, linebuff);
     }
     /*
-    else if (strcmp(opToken, "iadd") == 0)
+    else if (strcmpi(opToken, "iadd") == 0)
     {
         errortype = COpcode::ProcessiAdd(currentInst, linebuff);
     }
     }
     */
-    else if (strcmp(opToken, "isub") == 0)
+    else if (strcmpi(opToken, "isub") == 0)
     {
         *errortype = COpcode::ProcessiSub(currentInst, linebuff);
     }
     /*
-    else if (strcmp(opToken, "imul") == 0)
+    else if (strcmpi(opToken, "imul") == 0)
     {
         errortype = COpcode::ProcessiMul(currentInst, linebuff);
     }
     }
     */
-    else if (strcmp(opToken, "idiv") == 0)
+    else if (strcmpi(opToken, "idiv") == 0)
     {
         *errortype = COpcode::ProcessiDiv(currentInst, linebuff);
     }
-    else if (strcmp(opToken, "shr") == 0)
+    else if (strcmpi(opToken, "shr") == 0)
     {
         *errortype = COpcode::ProcessShiftRight(currentInst, linebuff);
     }
-    else if (strcmp(opToken, "shl") == 0)
+    else if (strcmpi(opToken, "shl") == 0)
     {
         *errortype = COpcode::ProcessShiftLeft(currentInst, linebuff);
     }
-    else if (strcmp(opToken, "cmp") == 0)
+    else if (strcmpi(opToken, "cmp") == 0)
     {
         *errortype = COpcode::ProcessCompare(currentInst, linebuff);
     }
