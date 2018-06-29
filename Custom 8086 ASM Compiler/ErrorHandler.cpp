@@ -1,7 +1,13 @@
+/*
+    Custom 8086 ASM Compiler
+    Author : Crspy
+    Do not delete this comment block. Respect others' work!
+*/
+
 #include "ErrorHandler.h"
 
 
-void CErrorHandler::PrintErrorMessage(eErrorType errortype, unsigned long linecount,const char* jmpLabel)
+void CErrorHandler::PrintErrorMessage(eErrorType errortype, unsigned long linecount,const char* jmpOrDataLabel)
 {
     const char* message = nullptr;
     switch (errortype)
@@ -48,13 +54,15 @@ void CErrorHandler::PrintErrorMessage(eErrorType errortype, unsigned long lineco
     case USING_SAME_NAME_FOR_TWO_LABELS:
         message = "Compiler Error, Using same name for two labels : \"%s\"\n";
         break;
+    case DATA_LABEL_NOT_FOUND:
+        message = "Compiler Error , Not defined data Label : \"%s\"\n";
     default:
         break;
     }
     if (message)
     {
-        if (jmpLabel)
-            printf(message, jmpLabel);
+        if (jmpOrDataLabel)
+            printf(message, jmpOrDataLabel);
         else
             printf(message, linecount);
         printf("Press Enter to continue...\n");

@@ -1,3 +1,9 @@
+/*
+    Custom 8086 ASM Compiler
+    Author : Crspy
+    Do not delete this comment block. Respect others' work!
+*/
+
 #pragma once
 #include "COpcode.h"
 

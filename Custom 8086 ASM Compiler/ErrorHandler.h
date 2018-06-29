@@ -1,3 +1,9 @@
+/*
+    Custom 8086 ASM Compiler
+    Author : Crspy
+    Do not delete this comment block. Respect others' work!
+*/
+
 #pragma once
 #include "stdafx.h"
 
@@ -17,11 +23,12 @@ enum eErrorType
     ONLY_ADDRESSES_OR_LABELS_ALLOWED,
     LABEL_NAMES_CANT_START_WITH_A_NUMBER,
     USING_SAME_NAME_FOR_TWO_LABELS,
-    JUMPING_TO_NON_EXISTANT_LABEL
+    JUMPING_TO_NON_EXISTANT_LABEL,
+    DATA_LABEL_NOT_FOUND
 };
 
 class CErrorHandler
 {
 public:
-    static void PrintErrorMessage(eErrorType errortype, unsigned long linecount, const char* jmpLabel = nullptr);
+    static void PrintErrorMessage(eErrorType errortype, unsigned long linecount, const char* jmpOrDataLabel = nullptr);
 };

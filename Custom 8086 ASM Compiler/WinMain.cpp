@@ -1,4 +1,9 @@
-// compile with: /D_UNICODE /DUNICODE /DWIN32 /D_WINDOWS /c
+/*
+    Custom 8086 ASM Compiler
+    Author : Crspy
+    Do not delete this comment block. Respect others' work!
+*/
+
 #include "WinMain.h"
 
 TCHAR szWindowClass[] = L"Custom 8086 ASM Compiler";
