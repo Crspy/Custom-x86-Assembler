@@ -2,7 +2,6 @@
 
 
 
-
 int8_t COpcode::GetRegID(const char* lineReg)
 {
     if (strcmp(lineReg, "ax") == 0)
@@ -19,12 +18,11 @@ int8_t COpcode::GetRegID(const char* lineReg)
 
 void COpcode::EliminateComments(char* line)
 {
-    char keys[] = "/;";
+    char keys[] = ";";
 
     char* pch = strpbrk(line, keys);
     while (pch != nullptr)
     {
-
         strcpy(pch, "\0");
         pch = strpbrk(pch + 1, keys);
     }
@@ -320,65 +318,22 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
 
     static uint32_t DataCounter = 0;
 
-    /*
-    auto PutStringInDataSeg = [](char* token,CROMBlock* myrom)
-    {
-        auto toklen = strlen(token);
-        for(int i = 0 ; i != toklen; i++)
-        {
-            const uint16_t usvalue = token[i];
-            // swapping endianess
-            *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(((char*)&usvalue));
-            *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *(((char*)& usvalue + 1));
-            DataCounter++;
-        }
-    };
-    */
-    *bMovingData = true;
-    char* linebuff = static_cast<char*>(malloc(line.capacity())); // new linebuff because the old one is destroyed in tokenization
-    strcpy(linebuff, line.c_str());
 
-    char * token = strtok(linebuff, "= \t");
-    logger(token);
-    EliminateTabs(token);
-    if (DoesStringStartWithNumber(token))
+    const auto PutCharsInDataSeg = [](CROMBlock* myrom,std::string& delimiter,std::string& buffer)
     {
-        return eErrorType::LABEL_NAMES_CANT_START_WITH_A_NUMBER;
-    }
-    constDataLabelsMap.insert(std::pair<std::string,uint32_t>(token,DataCounter));
+            size_t pos = buffer.find_first_of(delimiter);
+            std::string stoken = buffer.substr(0, pos);
+            buffer.erase(0, pos + delimiter.length());
+            pos = buffer.find_last_of(delimiter);
+            stoken = buffer.substr(0, pos);
+            buffer.erase(0, pos + delimiter.length());
 
-    char * token2 = strtok(nullptr, "= \t");
-    logger(token2);
-    char* pch = strtok(token2,",");
-    logger(pch);
-    while (pch != nullptr)
-    {    
-        printf("pch:>%s<\n",pch);
-        if (strchr(pch,'\"'))
-        {
-            char* token3 = strtok(pch, "\"\"");
-            auto toklen = strlen(token3); // string length without the nullterm
-            logger(toklen);
-            for(int i = 0 ; i <= toklen; i++)
+            printf("buffer: >%s<\n", stoken.c_str());
+            pos = stoken.length();
+            printf("tokenlegnth: >%d<\n", pos);
+            for(int i = 0 ; i <= pos; i++)
             {
-                int16_t usvalue = token3[i];
-                logger(usvalue);
-                // swapping endianess
-                printf("DataCount : %d\n",DataCounter);
-                *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(((char*)&usvalue));
-                *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *(((char*)& usvalue + 1));
-                DataCounter++;
-            }
-            logger(token3);
-        }
-        else if (strchr(pch,'\''))
-        {
-            char* token3 = strtok(pch, "''");
-            auto toklen = strlen(token3);
-            logger(toklen);
-            for(int i = 0 ; i < toklen; i++)
-            {
-                int16_t usvalue = token3[i];
+                int16_t usvalue = stoken[i];
                 logger(usvalue);
                 // swapping endianess
                 printf("DataCount : %d\n",DataCounter);
@@ -386,12 +341,49 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
                 *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *((char*)& usvalue + 1);
                 DataCounter++;
             }
-            logger(token3);
-        }
-        else if (EliminateComments(pch),EliminateTabs(pch),is_numbers_only(pch))
+
+    };
+    
+    *bMovingData = true;
+    char* linebuff = static_cast<char*>(malloc(line.capacity())); // new linebuff because the old one is destroyed in tokenization
+    strcpy(linebuff, line.c_str());
+    char* firstToken = strtok(linebuff,"= ");
+
+    if (DoesStringStartWithNumber(firstToken))
+    {
+        return eErrorType::LABEL_NAMES_CANT_START_WITH_A_NUMBER;
+    }
+    printf("Dataname: >%s<\n",firstToken);
+    constDataLabelsMap.insert(std::pair<std::string,uint32_t>(firstToken,DataCounter));
+    
+    char* linetoken = strtok(nullptr,"");
+
+    std::string buffer;
+    std::stringstream ss(linetoken); 
+
+    linebuff = static_cast<char*>(realloc(linebuff,strlen(linetoken)+1)); // new linebuff because the old one is destroyed in tokenization        
+    //printf("capacity:%d\n",buffer.capacity());
+    while (std::getline(ss,buffer,','))
+    {          
+
+        strcpy(linebuff, buffer.c_str());
+        char* token = strtok(linebuff,"= \t");
+        EliminateComments(token);
+        EliminateTabs(token);
+        if (buffer.find_first_of('\"') != std::string::npos)
         {
-            logger(pch);
-            long lvalue = strtol(pch, nullptr, 0);
+            std::string delimiter = "\"";
+            PutCharsInDataSeg(myrom,delimiter,buffer);
+        }
+        else if (buffer.find_first_of('\'') != std::string::npos)
+        {
+            std::string delimiter = "\'";
+            PutCharsInDataSeg(myrom,delimiter,buffer);
+        }
+        else if (is_numbers_only(token))
+        {
+            logger(token);
+            long lvalue = strtol(token, nullptr, 0);
             printf("lvalue>%ld<\n", lvalue);
             if (lvalue < 0) // negative number
             {
@@ -416,29 +408,34 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
                 *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(char*)&usvalue;
                 *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *((char*)& usvalue + 1);
                 printf("DataSegValue: %d\n",*(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1));
-                printf("DataSegValue: %d\n",*(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value)));
+                printf("DataSegValue: %d\n",*reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value));
             }
             else
                 return eErrorType::DATA_VALUE_OUTOFBOUNDS;
             DataCounter++;
         }
-        else if (EliminateComments(pch),EliminateTabs(pch), constDataLabelsMap.find(pch) != constDataLabelsMap.end())
+        else if (
+            printf("token>%s<\n",token),
+            constDataLabelsMap.find(token) != constDataLabelsMap.end())
         {
-            logger(pch);
-            tMemAddress memadd(constDataLabelsMap.at(pch));
-            memadd.InsureMovAddress();
-            printf("DataSegMemAdd>%ld<\n", memadd.m_Address);
-            // swapping endianess
-            *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = memadd.byte0;
-            *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = memadd.byte1;
+            logger(token);
+            memadd->m_Address = constDataLabelsMap.at(token);
+            memadd->InsureMovAddress();
+            memadd->m_bNeedLoading = false; // to prevent PC from incrementing
+            printf("DataSegMemAdd>%ld<\n", memadd->m_Address);
+            // swapping endianes
+            *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = memadd->byte0;
+            *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = memadd->byte1;
             DataCounter++;            
         }
         else
         {   // don't add blank data declarations to the map
-            constDataLabelsMap.erase(token);
+            constDataLabelsMap.erase(firstToken);
         }
-       
-         pch = strtok(nullptr,",");           
+        
+        //auto compos = buffer.find_first_of(';');
+        //buffer.at(compos) = '\0';
+         //pch = strtok(nullptr,","); 
 
     }
 
