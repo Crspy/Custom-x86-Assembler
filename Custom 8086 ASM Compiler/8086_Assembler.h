@@ -7,9 +7,9 @@
 #define MAX_PC 32767
 
 void ProcessCompile(const wchar_t* filename, BOOL bSortInFolders);
-bool ProcessAllJmpInst(CROMBlock* myrom, std::map<std::string, uint32_t>* jmplabelsmap, std::map<std::string, 
+bool ProcessAllJmpInst(CROMBlock* myrom, std::map<uint32_t , std::string>* jmplabelsmap, std::map<std::string, 
     uint32_t>* labelsmap);
-bool ProcessAllConstDataMovInst(CROMBlock* myrom, std::map<std::string, uint32_t>* constDataMovLabelsMap, 
+bool ProcessAllConstDataMovInst(CROMBlock* myrom, std::map<uint32_t , std::string>* constDataMovLabelsMap, 
     std::map<std::string, uint32_t>* constDataLabelsMap);
 bool IsCommentLine(std::string& line);
 bool DoesFileExist(const wchar_t* filename);

@@ -67,7 +67,7 @@ eOpcodeDir COpcode::GetOpcodeDir(std::string& line)
 
 
 eErrorType COpcode::ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer,
-    std::map<std::string, uint32_t>& constDataMovLabelsMap,uint32_t PC)
+    std::map<uint32_t, std::string>& constDataMovLabelsMap,uint32_t PC)
 {
     currentInst[0].opcode = eOpcode::MOVE_IN;
 
@@ -119,7 +119,7 @@ eErrorType COpcode::ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, 
     }
     else
     {
-        constDataMovLabelsMap.insert(std::pair<std::string,uint32_t>(token2,PC));
+        constDataMovLabelsMap.insert(std::pair<uint32_t , std::string>(PC, token2));
         memadd->m_bNeedLoading = true; // because the address will be always >= 0x8000        
         currentInst[1].opcode = currentInst[0].opcode;
         currentInst[1].dir_flag = currentInst[0].dir_flag;
@@ -139,7 +139,7 @@ eErrorType COpcode::ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, 
 
 
 eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer,
-    bool* bMovingData, CROMBlock* myrom,std::map<std::string, uint32_t>& constDataMovLabelsMap,uint32_t PC)
+    bool* bMovingData, CROMBlock* myrom,std::map<uint32_t, std::string>& constDataMovLabelsMap,uint32_t PC)
 {
     currentInst[0].opcode = eOpcode::MOVE_OUT;
     currentInst[0].dir_flag = eOpcodeDir::DIR_OUT;
@@ -187,7 +187,7 @@ eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst,
         }
         else
         {
-            constDataMovLabelsMap.insert(std::pair<std::string,uint32_t>(token,PC));
+            constDataMovLabelsMap.insert(std::pair<uint32_t , std::string>(PC,token));
             memadd->m_bNeedLoading = true; // because the address will be always >= 0x8000
             currentInst[1].opcode = currentInst[0].opcode;
             currentInst[1].dir_flag = currentInst[0].dir_flag;
@@ -341,11 +341,14 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
     char * token = strtok(linebuff, "= \t");
     logger(token);
     EliminateTabs(token);
+    if (DoesStringStartWithNumber(token))
+    {
+        return eErrorType::LABEL_NAMES_CANT_START_WITH_A_NUMBER;
+    }
     constDataLabelsMap.insert(std::pair<std::string,uint32_t>(token,DataCounter));
 
     char * token2 = strtok(nullptr, "= \t");
     logger(token2);
-    bool bShiftPhase = false;
     char* pch = strtok(token2,",");
     logger(pch);
     while (pch != nullptr)
@@ -419,17 +422,24 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
                 return eErrorType::DATA_VALUE_OUTOFBOUNDS;
             DataCounter++;
         }
+        else if (EliminateComments(pch),EliminateTabs(pch), constDataLabelsMap.find(pch) != constDataLabelsMap.end())
+        {
+            logger(pch);
+            tMemAddress memadd(constDataLabelsMap.at(pch));
+            memadd.InsureMovAddress();
+            printf("DataSegMemAdd>%ld<\n", memadd.m_Address);
+            // swapping endianess
+            *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = memadd.byte0;
+            *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = memadd.byte1;
+            DataCounter++;            
+        }
         else
         {   // don't add blank data declarations to the map
             constDataLabelsMap.erase(token);
         }
+       
+         pch = strtok(nullptr,",");           
 
-        if (bShiftPhase)
-            pch = strtok(pch,",");           
-        else
-            pch = strtok(nullptr,",");
-
-        bShiftPhase = !bShiftPhase;
     }
 
     

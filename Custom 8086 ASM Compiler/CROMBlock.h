@@ -2,7 +2,6 @@
 
 struct tInstBlock
 {
-public:
     union
     {
         struct
@@ -57,7 +56,6 @@ public:
                         uint8_t InstHigh;
                         uint8_t InstLow;
                     };
-
                     tInstBlock instblock;
                 };
             } Inst[32768]; // 32768 byte low  and 32768 high
@@ -90,12 +88,6 @@ public:
     {
         memset(this, 0, sizeof(CROMBlock)); // fill the RomBlock with zeroes
     }
-
-    static void SetRomInst(tInstBlock* dst, tInstBlock* src)
-    {
-        memcpy(dst,src,sizeof(tInstBlock));
-    }
-
 };
 static_assert(sizeof(CROMBlock) == 65536*2 , "CROMBlock size is incorrect");
 

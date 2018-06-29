@@ -39,11 +39,15 @@ void CErrorHandler::PrintErrorMessage(eErrorType errortype, unsigned long lineco
     case ONLY_ADDRESSES_OR_LABELS_ALLOWED:
         message = "Compiler Error, only labels or memory addresses allowed in jmp operation... in line : %ld\n";
         break;
-    case NO_NUMBERS_ALLOWED_IN_A_LABEL:
-        message = "Compiler Error, no numbers or special characters allowed in a label... in line : %ld\n";
+    case LABEL_NAMES_CANT_START_WITH_A_NUMBER:
+        message = "Compiler Error, label names can't start with a number... in line : %ld\n";
         break;
     case JUMPING_TO_NON_EXISTANT_LABEL:
         message = "Compiler Error, jumping to non existant Label : \"%s\"\n";
+        break;
+    case USING_SAME_NAME_FOR_TWO_LABELS:
+        message = "Compiler Error, Using same name for two labels : \"%s\"\n";
+        break;
     default:
         break;
     }

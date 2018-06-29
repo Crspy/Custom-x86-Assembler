@@ -22,34 +22,34 @@ class CBranching
 {
 public:
     static eErrorType ProcessUnCondJumpAndCall(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
-        std::map<std::string, uint32_t>& jmplabelsmap, bool bIsCall);
+        std::map<uint32_t , std::string>& jmplabelsmap, bool bIsCall);
 
     static eErrorType ProcessJumpIfZero(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
-        std::map<std::string, uint32_t>& jmplabelsmap,eCheckFlag checkflag);
+        std::map<uint32_t , std::string>& jmplabelsmap,eCheckFlag checkflag);
 
     static eErrorType ProcessJumpIfEqual(tMemAddress * memadd, tInstBlock * currentInst, char * linebuffer, uint32_t PC,
-        std::map<std::string, uint32_t>& jmplabelsmap, eCheckFlag checkflag);
+        std::map<uint32_t , std::string>& jmplabelsmap, eCheckFlag checkflag);
 
     static eErrorType ProcessJumpIfFlag(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
-        std::map<std::string, uint32_t>& jmplabelsmap,eCheckFlag checkflag,eJumpFlag jumpflag);
+        std::map<uint32_t , std::string>& jmplabelsmap,eCheckFlag checkflag,eJumpFlag jumpflag);
 
     // for jmp if greater ,  jmp if greater or equal
     static eErrorType ProcessJumpIfGreater(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
-        std::map<std::string, uint32_t>& jmplabelsmap,eCheckFlag checkflag);
+        std::map<uint32_t , std::string>& jmplabelsmap,eCheckFlag checkflag);
 
     // for jmp if lesser ,  jmp if lesser or equal
     static eErrorType ProcessJumpIfLess(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
-        std::map<std::string, uint32_t>& jmplabelsmap, eCheckFlag checkflag);
+        std::map<uint32_t , std::string>& jmplabelsmap, eCheckFlag checkflag);
 
     static eErrorType ProcessJumpIfOverFlow(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
-        std::map<std::string, uint32_t>& jmplabelsmap,eCheckFlag checkflag);
+        std::map<uint32_t , std::string>& jmplabelsmap,eCheckFlag checkflag);
 
     static eErrorType ProcessJumpIfSigned(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
-        std::map<std::string, uint32_t>& jmplabelsmap,eCheckFlag checkflag);
+        std::map<uint32_t , std::string>& jmplabelsmap,eCheckFlag checkflag);
 
     static eErrorType ProcessReturn(tInstBlock * currentInst);
 
     static bool ProcessBranchingOpcodes(char* opToken,tMemAddress* memadd, tInstBlock* currentInst, char* linebuff,
-        eErrorType* errortype,uint32_t PC,std::map<std::string, uint32_t>& jmplabelsmap,bool* bDoubleJmp);
+        eErrorType* errortype,uint32_t PC,std::map<uint32_t , std::string>& jmplabelsmap,bool* bDoubleJmp);
 
 };

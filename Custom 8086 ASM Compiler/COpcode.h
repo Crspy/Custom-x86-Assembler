@@ -71,10 +71,10 @@ public:
     static eOpcodeDir GetOpcodeDir(std::string& line);
 
     static eErrorType ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer,
-        bool* bMovingData, CROMBlock* myrom,std::map<std::string, uint32_t>& constDataMovLabelsMap,uint32_t PC);
+        bool* bMovingData, CROMBlock* myrom,std::map<uint32_t,std::string>& constDataMovLabelsMap,uint32_t PC);
     
     static eErrorType ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer,
-        std::map<std::string, uint32_t>& constDataMovLabelsMap,uint32_t PC);
+        std::map< uint32_t, std::string>& constDataMovLabelsMap,uint32_t PC);
 
     static eErrorType ProcessIndirectMoveOUT(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer);
 
