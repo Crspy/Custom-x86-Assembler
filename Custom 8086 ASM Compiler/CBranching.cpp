@@ -46,19 +46,18 @@ eErrorType CBranching::ProcessUnCondJumpAndCall(tMemAddress* memadd, tInstBlock*
             currentInst[0].address = memadd->byte0;           
         }
     }
-    else if (is_alpha_only(token)) 
+    else if (!DoesStringStartWithNumber(token)) 
     {
         //logger("ALPHA ONLY");
         //std::cin.get();
         memadd->m_bNeedLoading = true; // needs loading by default 
         currentInst[1].opcode = currentInst[0].opcode;
         currentInst[0].opcode = eOpcode::LOAD;
-        std::string jmplabel(token);
-        jmplabelsmap.insert(std::pair<uint32_t , std::string>(PC,jmplabel));
+        jmplabelsmap.insert(std::pair<uint32_t , std::string>(PC,token));
     }
     else
     {
-        return eErrorType::ONLY_ADDRESSES_OR_LABELS_ALLOWED;
+        return eErrorType::LABEL_NAMES_CANT_START_WITH_A_NUMBER;
 
     }
     return eErrorType::NO_ERROR_DETECTED;
@@ -115,7 +114,7 @@ eErrorType CBranching::ProcessJumpIfFlag(tMemAddress * memadd, tInstBlock * curr
             currentInst[0].JMPaddress = memadd->byte0;           
         }
     }
-    else if (is_alpha_only(token)) 
+    else if (!DoesStringStartWithNumber(token)) 
     {
         //logger("ALPHA ONLY");
         //std::cin.get();
@@ -128,12 +127,11 @@ eErrorType CBranching::ProcessJumpIfFlag(tMemAddress * memadd, tInstBlock * curr
         currentInst[0].opcode = eOpcode::LOAD;
         currentInst[0].dir_flag = 0; 
 
-        std::string jmplabel(token);
-        jmplabelsmap.insert(std::pair<uint32_t , std::string>(PC ,jmplabel));
+        jmplabelsmap.insert(std::pair<uint32_t , std::string>(PC ,token));
     }
     else
     {
-        return eErrorType::ONLY_ADDRESSES_OR_LABELS_ALLOWED;
+        return eErrorType::LABEL_NAMES_CANT_START_WITH_A_NUMBER;
 
     }
     return eErrorType::NO_ERROR_DETECTED;
@@ -204,7 +202,7 @@ eErrorType CBranching::ProcessJumpIfGreater(tMemAddress * memadd, tInstBlock * c
             currentInst[2].address = memadd->byte1; // highbyte for load
         }
     }
-    else if (is_alpha_only(token)) 
+    else if (!DoesStringStartWithNumber(token)) 
     {
 
        memadd->m_bNeedLoading = true; // needs loading by default 
@@ -229,13 +227,11 @@ eErrorType CBranching::ProcessJumpIfGreater(tMemAddress * memadd, tInstBlock * c
        currentInst[2].opcode = eOpcode::LOAD;
         
 
-        std::string jmplabel(token);
-
-        jmplabelsmap.insert(std::pair<uint32_t , std::string>(PC + 2,jmplabel));
+        jmplabelsmap.insert(std::pair<uint32_t , std::string>(PC + 2,token));
     }
     else
     {
-        return eErrorType::ONLY_ADDRESSES_OR_LABELS_ALLOWED;
+        return eErrorType::LABEL_NAMES_CANT_START_WITH_A_NUMBER;
 
     }
     return eErrorType::NO_ERROR_DETECTED;
@@ -304,7 +300,7 @@ eErrorType CBranching::ProcessJumpIfLess(tMemAddress * memadd, tInstBlock * curr
             currentInst[2].address = memadd->byte1; // highbyte for load
         }
     }
-    else if (is_alpha_only(token)) 
+    else if (!DoesStringStartWithNumber(token)) 
     {
 
         memadd->m_bNeedLoading = true; // needs loading by default 
@@ -331,13 +327,11 @@ eErrorType CBranching::ProcessJumpIfLess(tMemAddress * memadd, tInstBlock * curr
         currentInst[2].address = memadd->byte1; // highbyte for load
         
 
-        std::string jmplabel(token);
-
-        jmplabelsmap.insert(std::pair<uint32_t , std::string>(PC + 2, jmplabel));
+        jmplabelsmap.insert(std::pair<uint32_t , std::string>(PC + 2, token));
     }
     else
     {
-        return eErrorType::ONLY_ADDRESSES_OR_LABELS_ALLOWED;
+        return eErrorType::LABEL_NAMES_CANT_START_WITH_A_NUMBER;
 
     }
     return eErrorType::NO_ERROR_DETECTED;
@@ -357,8 +351,6 @@ eErrorType CBranching::ProcessJumpIfSigned(tMemAddress * memadd, tInstBlock * cu
 
 eErrorType CBranching::ProcessReturn(tInstBlock * currentInst)
 {
-    memset(currentInst,0,sizeof(tInstBlock));
-
     currentInst[0].opcode = eOpcode::RETURN;    
     
     return eErrorType::NO_ERROR_DETECTED;

@@ -33,7 +33,8 @@ enum eOpcode : uint8_t
     RETURN = 9,
     UNCOND_JUMP = 10,
     INSTRUCTION_OUT = 11,
-    DATA_OUT = 12
+    DATA_OUT = 12,
+    NO_OPERATION = 13
     
 };
 
@@ -116,8 +117,7 @@ public:
     static eErrorType ProcessInstOut(tInstBlock* currentInst, char* linebuffer);
 
     static eErrorType ProcessDataOut(tInstBlock* currentInst, char* linebuffer);
-    
 
-
+    static eErrorType ProcessNoOperation(tInstBlock * currentInst);
 
 };

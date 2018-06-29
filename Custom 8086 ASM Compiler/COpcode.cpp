@@ -492,6 +492,13 @@ eErrorType COpcode::ProcessDataOut(tInstBlock * currentInst, char * linebuffer)
     return eErrorType::NO_ERROR_DETECTED;
 }
 
+eErrorType COpcode::ProcessNoOperation(tInstBlock * currentInst)
+{
+    currentInst[0].opcode = eOpcode::NO_OPERATION;    
+    
+    return eErrorType::NO_ERROR_DETECTED;
+}
+
 eErrorType COpcode::ProcessNot(tInstBlock* currentInst, char* linebuffer)
 {
     currentInst[0].const_ALU_opcode = eOpcode::ALU;
