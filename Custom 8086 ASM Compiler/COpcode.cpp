@@ -10,13 +10,13 @@
 
 int8_t COpcode::GetRegID(const char* lineReg)
 {
-    if (strcmpi(lineReg, "ax") == 0)
+    if (_strcmpi(lineReg, "ax") == 0)
         return eRegID::AX;
-    else if (strcmpi(lineReg, "bx") == 0)
+    else if (_strcmpi(lineReg, "bx") == 0)
         return eRegID::BX;
-    else if (strcmpi(lineReg, "cx") == 0)
+    else if (_strcmpi(lineReg, "cx") == 0)
         return eRegID::CX;
-    else if (strcmpi(lineReg, "dx") == 0)
+    else if (_strcmpi(lineReg, "dx") == 0)
         return eRegID::DX;
     else
         return -1;
@@ -70,7 +70,7 @@ eOpcodeDir COpcode::GetOpcodeDir(std::string& line)
 }
 
 
-eErrorType COpcode::ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer,
+eErrorType COpcode::ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, std::string& line,
     std::map<uint32_t, std::string>& constDataMovLabelsMap,uint32_t PC)
 {
     currentInst[0].opcode = eOpcode::MOVE_IN;
@@ -87,7 +87,7 @@ eErrorType COpcode::ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, 
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
-    char* token2 = strtok(nullptr, " ,[]/");
+    char* token2 = strtok(nullptr, ",[]/");
     logger(token2);
     EliminateComments(token2); EliminateTabs(token2);
     if (GetRegID(token2) >= 0)
@@ -191,6 +191,7 @@ eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst,
         }
         else
         {
+
             constDataMovLabelsMap.insert(std::pair<uint32_t , std::string>(PC,token));
             memadd->m_bNeedLoading = true; // because the address will be always >= 0x8000
             currentInst[1].opcode = currentInst[0].opcode;
@@ -324,34 +325,9 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
 
     static uint32_t DataCounter = 0;
 
-
-    const auto PutCharsInDataSeg = [](CROMBlock* myrom,std::string& delimiter,std::string& buffer)
-    {
-            size_t pos = buffer.find_first_of(delimiter);
-            std::string stoken = buffer.substr(0, pos);
-            buffer.erase(0, pos + delimiter.length());
-            pos = buffer.find_last_of(delimiter);
-            stoken = buffer.substr(0, pos);
-            buffer.erase(0, pos + delimiter.length());
-
-            printf("buffer: >%s<\n", stoken.c_str());
-            pos = stoken.length();
-            printf("tokenlegnth: >%d<\n", pos);
-            for(int i = 0 ; i <= pos; i++)
-            {
-                int16_t usvalue = stoken[i];
-                logger(usvalue);
-                // swapping endianess
-                printf("DataCount : %d\n",DataCounter);
-                *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(char*)&usvalue;
-                *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *((char*)& usvalue + 1);
-                DataCounter++;
-            }
-
-    };
     
     *bMovingData = true;
-    char* linebuff = static_cast<char*>(malloc(line.capacity())); // new linebuff because the old one is destroyed in tokenization
+    auto linebuff = static_cast<char*>(malloc(line.capacity())); // new linebuff because the old one is destroyed in tokenization
     strcpy(linebuff, line.c_str());
     char* firstToken = strtok(linebuff,"= ");
 
@@ -371,7 +347,6 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
     //printf("capacity:%d\n",buffer.capacity());
     while (std::getline(ss,buffer,','))
     {          
-
         strcpy(linebuff, buffer.c_str());
         char* token = strtok(linebuff,"= \t");
         EliminateComments(token);
@@ -379,12 +354,48 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
         if (buffer.find_first_of('\"') != std::string::npos)
         {
             std::string delimiter = "\"";
-            PutCharsInDataSeg(myrom,delimiter,buffer);
+            size_t pos = buffer.find_first_of(delimiter);
+            std::string stoken = buffer.substr(0, pos);
+            buffer.erase(0, pos + delimiter.length());
+            pos = buffer.find_last_of(delimiter);
+            stoken = buffer.substr(0, pos);
+            buffer.erase(0, pos + delimiter.length());
+            printf("buffer: >%s<\n", stoken.c_str());
+            pos = stoken.length();
+            printf("tokenlegnth: >%d<\n", pos);
+            for (int i = 0; i <= pos; i++)  //  "<="   to print the null char as well
+            {
+                int16_t usvalue = stoken[i];
+                logger(usvalue);
+                // swapping endianess
+                printf("DataCount : %d\n", DataCounter);
+                *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(char*)&usvalue;
+                *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *((char*)& usvalue + 1);
+                DataCounter++;
+            }
         }
         else if (buffer.find_first_of('\'') != std::string::npos)
         {
             std::string delimiter = "\'";
-            PutCharsInDataSeg(myrom,delimiter,buffer);
+            size_t pos = buffer.find_first_of(delimiter);
+            std::string stoken = buffer.substr(0, pos);
+            buffer.erase(0, pos + delimiter.length());
+            pos = buffer.find_last_of(delimiter);
+            stoken = buffer.substr(0, pos);
+            buffer.erase(0, pos + delimiter.length());
+            printf("buffer: >%s<\n", stoken.c_str());
+            pos = stoken.length();
+            printf("tokenlegnth: >%d<\n", pos);
+            for (int i = 0; i < pos; i++)   //  "<"   to not print the null char
+            {
+                int16_t usvalue = stoken[i];
+                logger(usvalue);
+                // swapping endianess
+                printf("DataCount : %d\n", DataCounter);
+                *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(char*)&usvalue;
+                *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *((char*)& usvalue + 1);
+                DataCounter++;
+            }
         }
         else if (is_numbers_only(token))
         {
@@ -497,6 +508,26 @@ eErrorType COpcode::ProcessNoOperation(tInstBlock * currentInst)
     currentInst[0].opcode = eOpcode::NO_OPERATION;    
     
     return eErrorType::NO_ERROR_DETECTED;
+}
+
+eErrorType COpcode::ProcessInput(tInstBlock * currentInst, char * linebuffer)
+{
+	currentInst[0].opcode = eOpcode::DATA_IN;
+	currentInst[0].dir_flag = eOpcodeDir::DIR_IN;
+
+	char * token = strtok(nullptr, " ,[]/");
+	logger(token);
+	EliminateComments(token); EliminateTabs(token);
+	int8_t reg = GetRegID(token);
+
+	if (reg == -1)
+	{
+		return eErrorType::UNKNOWN_REG_NAME;
+	}
+
+	currentInst[0].reg_id = reg;
+
+	return eErrorType::NO_ERROR_DETECTED;
 }
 
 eErrorType COpcode::ProcessNot(tInstBlock* currentInst, char* linebuffer)
@@ -941,7 +972,6 @@ eErrorType COpcode::ProcessiMul(tInstBlock* currentInst, char* linebuffer)
 
     return eErrorType::NO_ERROR_DETECTED;
 }
-*/
 
 eErrorType COpcode::ProcessiDiv(tInstBlock* currentInst, char* linebuffer)
 {
@@ -972,7 +1002,7 @@ eErrorType COpcode::ProcessiDiv(tInstBlock* currentInst, char* linebuffer)
 
     return eErrorType::NO_ERROR_DETECTED;
 }
-
+*/
 
 eErrorType COpcode::ProcessCompare(tInstBlock* currentInst, char* linebuffer)
 {
@@ -1052,87 +1082,88 @@ eErrorType COpcode::ProcessShiftRight(tInstBlock* currentInst, char* linebuffer)
 
 bool COpcode::ProcessALUOpcodes(char* opToken,tInstBlock* currentInst, char* linebuff,eErrorType* errortype)
 {
-    if (strcmpi(opToken, "add") == 0)
+    if (_strcmpi(opToken, "add") == 0)
     {
         *errortype = COpcode::ProcessAdd(currentInst, linebuff);
     }
-    else if (strcmpi(opToken, "not") == 0)
+    else if (_strcmpi(opToken, "not") == 0)
     {
         *errortype = COpcode::ProcessNot(currentInst, linebuff);
     }
     /*
-    else if (strcmpi(opToken, "trans") == 0)
+    else if (_strcmpi(opToken, "trans") == 0)
     {
         errortype = COpcode::ProcessTransfer(currentInst, linebuff);
     }
     */
-    else if (strcmpi(opToken, "inc") == 0)
+    else if (_strcmpi(opToken, "inc") == 0)
     {
         *errortype = COpcode::ProcessInc(currentInst, linebuff);
     }
-    else if (strcmpi(opToken, "dec") == 0)
+    else if (_strcmpi(opToken, "dec") == 0)
     {
         *errortype = COpcode::ProcessDec(currentInst, linebuff);
     }
-    else if (strcmpi(opToken, "xor") == 0)
+    else if (_strcmpi(opToken, "xor") == 0)
     {
         *errortype = COpcode::ProcessXor(currentInst, linebuff);
     }
-    else if (strcmpi(opToken, "or") == 0)
+    else if (_strcmpi(opToken, "or") == 0)
     {
         *errortype = COpcode::ProcessOR(currentInst, linebuff);
     }
-    else if (strcmpi(opToken, "and") == 0)
+    else if (_strcmpi(opToken, "and") == 0)
     {
         *errortype = COpcode::ProcessAND(currentInst, linebuff);
     }
-    else if (strcmpi(opToken, "mod") == 0)
+    else if (_strcmpi(opToken, "mod") == 0)
     {
         *errortype = COpcode::ProcessModulus(currentInst, linebuff);
     }
-    else if (strcmpi(opToken, "sub") == 0)
+    else if (_strcmpi(opToken, "sub") == 0)
     {
         *errortype = COpcode::ProcessSub(currentInst, linebuff);
     }
-    else if (strcmpi(opToken, "mul") == 0)
+    else if (_strcmpi(opToken, "mul") == 0)
     {
         *errortype = COpcode::ProcessMul(currentInst, linebuff);
     }
-    else if (strcmpi(opToken, "div") == 0)
+    else if (_strcmpi(opToken, "div") == 0)
     {
         *errortype = COpcode::ProcessDiv(currentInst, linebuff);
     }
     /*
-    else if (strcmpi(opToken, "iadd") == 0)
+    else if (_strcmpi(opToken, "iadd") == 0)
     {
         errortype = COpcode::ProcessiAdd(currentInst, linebuff);
     }
     }
     */
-    else if (strcmpi(opToken, "isub") == 0)
+    else if (_strcmpi(opToken, "isub") == 0)
     {
         *errortype = COpcode::ProcessiSub(currentInst, linebuff);
     }
     /*
-    else if (strcmpi(opToken, "imul") == 0)
+    else if (_strcmpi(opToken, "imul") == 0)
     {
         errortype = COpcode::ProcessiMul(currentInst, linebuff);
     }
     }
-    */
-    else if (strcmpi(opToken, "idiv") == 0)
+    
+    else if (_strcmpi(opToken, "idiv") == 0)
     {
         *errortype = COpcode::ProcessiDiv(currentInst, linebuff);
     }
-    else if (strcmpi(opToken, "shr") == 0)
+    */
+    else if (_strcmpi(opToken, "shr") == 0)
     {
         *errortype = COpcode::ProcessShiftRight(currentInst, linebuff);
     }
-    else if (strcmpi(opToken, "shl") == 0)
+    else if (_strcmpi(opToken, "shl") == 0)
     {
         *errortype = COpcode::ProcessShiftLeft(currentInst, linebuff);
     }
-    else if (strcmpi(opToken, "cmp") == 0)
+    else if (_strcmpi(opToken, "cmp") == 0)
     {
         *errortype = COpcode::ProcessCompare(currentInst, linebuff);
     }

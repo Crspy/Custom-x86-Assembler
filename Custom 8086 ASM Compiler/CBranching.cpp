@@ -126,6 +126,7 @@ eErrorType CBranching::ProcessJumpIfFlag(tMemAddress * memadd, tInstBlock * curr
 
         currentInst[0].opcode = eOpcode::LOAD;
         currentInst[0].dir_flag = 0; 
+        currentInst[0].reg_id = 0;
 
         jmplabelsmap.insert(std::pair<uint32_t , std::string>(PC ,token));
     }
@@ -149,17 +150,17 @@ eErrorType CBranching::ProcessJumpIfGreater(tMemAddress * memadd, tInstBlock * c
 
     if (checkflag == eCheckFlag::FLAG_IF_TRUE)
     {
-        currentInst[0].IfCheck_Flag = 1;
+        currentInst[0].IfCheck_Flag = 1;     // !ZF && !SF , but we invert ZF to skip jumping if ZF is true
         currentInst[1].IfCheck_Flag = 0;
     }
-    else
+    else // GREATER OR EQUAL
     {
-        currentInst[0].IfCheck_Flag = 0;
-        currentInst[1].IfCheck_Flag = 1;
+        currentInst[0].IfCheck_Flag = 1;    // ZF || !SF , we don't invert ZF here
+        currentInst[1].IfCheck_Flag = 0;
     }
 
 
-    tMemAddress nextJmpAddress(PC + 2);
+    tMemAddress nextJmpAddress(PC + 4);
     nextJmpAddress.InsureJmpAddress();
 
     char * token = strtok(nullptr, " [], \t");
@@ -188,13 +189,22 @@ eErrorType CBranching::ProcessJumpIfGreater(tMemAddress * memadd, tInstBlock * c
             currentInst[1].const_condJump_opcode = currentInst[0].const_condJump_opcode;
             currentInst[1].IfCheck_Flag = currentInst[0].IfCheck_Flag;
             currentInst[1].jmp_Flag = currentInst[0].jmp_Flag;
-            currentInst[1].JMPaddress = nextJmpAddress.byte0; // lowbyte for mov
+           
 
             // for loading
             currentInst[0].reg_id = 0;
             currentInst[0].dir_flag = 0; 
             currentInst[0].opcode = eOpcode::LOAD;
-            currentInst[0].address = nextJmpAddress.byte1; // highbyte for load
+            if (checkflag == eCheckFlag::FLAG_IF_TRUE)
+            {
+                currentInst[0].address = nextJmpAddress.byte1; // highbyte for load
+                currentInst[1].JMPaddress = nextJmpAddress.byte0; // lowbyte for mov
+            }
+            else // ZF || !SF
+            {
+                currentInst[0].address = memadd->byte1;
+                currentInst[1].JMPaddress = memadd->byte0;
+            }
 
             currentInst[2].reg_id = 0;
             currentInst[2].dir_flag = 0; 
@@ -214,13 +224,22 @@ eErrorType CBranching::ProcessJumpIfGreater(tMemAddress * memadd, tInstBlock * c
        currentInst[1].const_condJump_opcode = currentInst[0].const_condJump_opcode;
        currentInst[1].IfCheck_Flag = currentInst[0].IfCheck_Flag;
        currentInst[1].jmp_Flag = currentInst[0].jmp_Flag;
-       currentInst[1].JMPaddress = nextJmpAddress.byte0; // lowbyte for mov
+
 
        // for loading
        currentInst[0].reg_id = 0;
        currentInst[0].dir_flag = 0; 
        currentInst[0].opcode = eOpcode::LOAD;
-       currentInst[0].address = nextJmpAddress.byte1; // highbyte for load
+       if (checkflag == eCheckFlag::FLAG_IF_TRUE)
+       {
+           currentInst[0].JMPaddress = nextJmpAddress.byte1; // highbyte for load
+           currentInst[1].JMPaddress = nextJmpAddress.byte0; // lowbyte for mov
+       }
+       else // ZF || !SF
+       {
+           currentInst[0].JMPaddress = memadd->byte1;
+           currentInst[1].JMPaddress = memadd->byte0;
+       }
 
        currentInst[2].reg_id = 0;
        currentInst[2].dir_flag = 0; 
@@ -228,6 +247,8 @@ eErrorType CBranching::ProcessJumpIfGreater(tMemAddress * memadd, tInstBlock * c
         
 
         jmplabelsmap.insert(std::pair<uint32_t , std::string>(PC + 2,token));
+        if (checkflag != eCheckFlag::FLAG_IF_TRUE)
+            jmplabelsmap.insert(std::pair<uint32_t, std::string>(PC , token));
     }
     else
     {
@@ -248,16 +269,16 @@ eErrorType CBranching::ProcessJumpIfLess(tMemAddress * memadd, tInstBlock * curr
 
     if (checkflag == eCheckFlag::FLAG_IF_TRUE)
     {
-        currentInst[0].IfCheck_Flag = 1;
+        currentInst[0].IfCheck_Flag = 1; // !ZF && SF ,  but we invert ZF to skip jumping if ZF is true
         currentInst[1].IfCheck_Flag = 1;
     }
-    else
+    else // LESS OR EQUAL
     {
-        currentInst[0].IfCheck_Flag = 0;
-        currentInst[1].IfCheck_Flag = 0;
+        currentInst[0].IfCheck_Flag = 1; // ZF || SF , we don't invert ZF here
+        currentInst[1].IfCheck_Flag = 1;
     }
 
-    tMemAddress nextJmpAddress(PC + 2);
+    tMemAddress nextJmpAddress(PC + 4);
     nextJmpAddress.InsureJmpAddress();
 
     char * token = strtok(nullptr, " [], \t");
@@ -286,18 +307,28 @@ eErrorType CBranching::ProcessJumpIfLess(tMemAddress * memadd, tInstBlock * curr
             currentInst[1].const_condJump_opcode = currentInst[0].const_condJump_opcode;
             currentInst[1].IfCheck_Flag = currentInst[0].IfCheck_Flag;
             currentInst[1].jmp_Flag = currentInst[0].jmp_Flag;
-            currentInst[1].JMPaddress = nextJmpAddress.byte0; // lowbyte for mov
+
 
             // for loading
             currentInst[0].reg_id = 0;
             currentInst[0].dir_flag = 0; 
             currentInst[0].opcode = eOpcode::LOAD;
-            currentInst[0].address = nextJmpAddress.byte1; // highbyte for load
+            if (checkflag == eCheckFlag::FLAG_IF_TRUE)
+            {
+                currentInst[0].JMPaddress = nextJmpAddress.byte1; // highbyte for load
+                currentInst[1].JMPaddress = nextJmpAddress.byte0; // lowbyte for mov
+            }
+            else // ZF || SF 
+            {
+                currentInst[0].JMPaddress = memadd->byte1;
+                currentInst[1].JMPaddress = memadd->byte0;
+            }
+
 
             currentInst[2].reg_id = 0;
             currentInst[2].dir_flag = 0; 
             currentInst[2].opcode = eOpcode::LOAD;
-            currentInst[2].address = memadd->byte1; // highbyte for load
+            currentInst[2].JMPaddress = memadd->byte1; // highbyte for load
         }
     }
     else if (!DoesStringStartWithNumber(token)) 
@@ -313,13 +344,16 @@ eErrorType CBranching::ProcessJumpIfLess(tMemAddress * memadd, tInstBlock * curr
         currentInst[1].const_condJump_opcode = currentInst[0].const_condJump_opcode;
         currentInst[1].IfCheck_Flag = currentInst[0].IfCheck_Flag;
         currentInst[1].jmp_Flag = currentInst[0].jmp_Flag;
-        currentInst[1].JMPaddress = nextJmpAddress.byte0; // lowbyte for mov
 
         // for loading
         currentInst[0].reg_id = 0;
         currentInst[0].dir_flag = 0; 
         currentInst[0].opcode = eOpcode::LOAD;
-        currentInst[0].address = nextJmpAddress.byte1; // highbyte for load
+        if (checkflag == eCheckFlag::FLAG_IF_TRUE)
+        {
+            currentInst[0].JMPaddress = nextJmpAddress.byte1; // highbyte for load
+            currentInst[1].JMPaddress = nextJmpAddress.byte0; // lowbyte for mov
+        }
 
         currentInst[2].reg_id = 0;
         currentInst[2].dir_flag = 0; 
@@ -328,6 +362,8 @@ eErrorType CBranching::ProcessJumpIfLess(tMemAddress * memadd, tInstBlock * curr
         
 
         jmplabelsmap.insert(std::pair<uint32_t , std::string>(PC + 2, token));
+        if (checkflag != eCheckFlag::FLAG_IF_TRUE)
+            jmplabelsmap.insert(std::pair<uint32_t, std::string>(PC, token));
     }
     else
     {
@@ -360,83 +396,83 @@ bool CBranching::ProcessBranchingOpcodes(char * opToken, tMemAddress * memadd, t
     eErrorType * errortype, uint32_t PC, std::map<uint32_t , std::string>& jmplabelsmap,bool* bDoubleJmp)
 {
     
-    if (strcmpi(opToken, "call") == 0)
+    if (_strcmpi(opToken, "call") == 0)
     {
         logger("FOUND A JUMP");
         *errortype = CBranching::ProcessUnCondJumpAndCall(memadd, currentInst, linebuff, PC, jmplabelsmap , true);
     }
-    else if (strcmpi(opToken, "jmp") == 0)
+    else if (_strcmpi(opToken, "jmp") == 0)
     {
         logger("FOUND A JUMP");
         *errortype = CBranching::ProcessUnCondJumpAndCall(memadd, currentInst, linebuff, PC, jmplabelsmap , false);
     }
-    else if (strcmpi(opToken, "je") == 0)
+    else if (_strcmpi(opToken, "je") == 0)
     {
         logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfEqual(memadd, currentInst, linebuff, PC, jmplabelsmap, 
             eCheckFlag::FLAG_IF_TRUE);
     }
-    else if (strcmpi(opToken, "jne") == 0)
+    else if (_strcmpi(opToken, "jne") == 0)
     {
         logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfEqual(memadd, currentInst, linebuff, PC, jmplabelsmap,eCheckFlag::FLAG_IF_NOT);
     }
-    else if (strcmpi(opToken, "jz") == 0)
+    else if (_strcmpi(opToken, "jz") == 0)
     {
         logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfZero(memadd, currentInst, linebuff, PC, jmplabelsmap,eCheckFlag::FLAG_IF_TRUE);
     }
-    else if (strcmpi(opToken, "jnz") == 0)
+    else if (_strcmpi(opToken, "jnz") == 0)
     {
         logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfZero(memadd, currentInst, linebuff, PC, jmplabelsmap,eCheckFlag::FLAG_IF_NOT);
     }
-    else if (strcmpi(opToken, "jo") == 0)
+    else if (_strcmpi(opToken, "jo") == 0)
     {
         logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfOverFlow(memadd, currentInst, linebuff, PC, jmplabelsmap,eCheckFlag::FLAG_IF_TRUE);
     }
-    else if (strcmpi(opToken, "jno") == 0)
+    else if (_strcmpi(opToken, "jno") == 0)
     {
         logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfOverFlow(memadd, currentInst, linebuff, PC, jmplabelsmap, eCheckFlag::FLAG_IF_NOT);
     }
-    else if (strcmpi(opToken, "js") == 0)
+    else if (_strcmpi(opToken, "js") == 0)
     {
         logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfSigned(memadd, currentInst, linebuff, PC, jmplabelsmap, eCheckFlag::FLAG_IF_TRUE);
     }
-    else if (strcmpi(opToken, "jns") == 0)
+    else if (_strcmpi(opToken, "jns") == 0)
     {
         logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfSigned(memadd, currentInst, linebuff, PC, jmplabelsmap, eCheckFlag::FLAG_IF_NOT);
     }
-    else if (strcmpi(opToken, "jg") == 0)
+    else if (_strcmpi(opToken, "jg") == 0)
     {
         logger("FOUND A JUMP");
         *bDoubleJmp = true;
         *errortype = CBranching::ProcessJumpIfGreater(memadd, currentInst, linebuff, PC, jmplabelsmap, eCheckFlag::FLAG_IF_TRUE);
     }
-    else if (strcmpi(opToken, "jge") == 0)
+    else if (_strcmpi(opToken, "jge") == 0)
     {
         logger("FOUND A JUMP");
         *bDoubleJmp = true;
         *errortype = CBranching::ProcessJumpIfGreater(memadd, currentInst, linebuff, PC, jmplabelsmap, eCheckFlag::FLAG_IF_TRUE_OR_EQUAL);
     }
-    else if (strcmpi(opToken, "jl") == 0)
+    else if (_strcmpi(opToken, "jl") == 0)
     {
         logger("FOUND A JUMP");
         *bDoubleJmp = true;
         *errortype = CBranching::ProcessJumpIfLess(memadd, currentInst, linebuff, PC, jmplabelsmap, eCheckFlag::FLAG_IF_TRUE);
     }
-    else if (strcmpi(opToken, "jle") == 0)
+    else if (_strcmpi(opToken, "jle") == 0)
     {
         logger("FOUND A JUMP");
         *bDoubleJmp = true;
         *errortype = CBranching::ProcessJumpIfLess(memadd, currentInst, linebuff, PC, jmplabelsmap, eCheckFlag::FLAG_IF_TRUE_OR_EQUAL);
 
     }
-    else if (strcmpi(opToken, "ret") == 0)
+    else if (_strcmpi(opToken, "ret") == 0)
     {
         *errortype = CBranching::ProcessReturn(currentInst);
     }

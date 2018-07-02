@@ -34,8 +34,8 @@ enum eOpcode : uint8_t
     UNCOND_JUMP = 10,
     INSTRUCTION_OUT = 11,
     DATA_OUT = 12,
-    NO_OPERATION = 13
-    
+    NO_OPERATION = 13,
+    DATA_IN = 14
 };
 
 enum eOpcodeDir : uint8_t
@@ -62,7 +62,6 @@ enum eALUOpcode
     SHIFT_RIGHT,
     SHIFT_LEFT,
     COMPARE,
-    iDIV // place holder
 };
 
 
@@ -80,7 +79,7 @@ public:
     static eErrorType ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer,
         bool* bMovingData, CROMBlock* myrom,std::map<uint32_t,std::string>& constDataMovLabelsMap,uint32_t PC);
     
-    static eErrorType ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer,
+    static eErrorType ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, std::string& line,
         std::map< uint32_t, std::string>& constDataMovLabelsMap,uint32_t PC);
 
     static eErrorType ProcessIndirectMoveOUT(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer);
@@ -106,7 +105,7 @@ public:
     //static eErrorType ProcessiAdd(tInstBlock* currentInst, char* linebuffer);
     static eErrorType ProcessiSub(tInstBlock* currentInst, char* linebuffer);
     //static eErrorType ProcessiMul(tInstBlock* currentInst, char* linebuffer);
-    static eErrorType ProcessiDiv(tInstBlock* currentInst, char* linebuffer);
+    //static eErrorType ProcessiDiv(tInstBlock* currentInst, char* linebuffer);
 
     static bool ProcessALUOpcodes(char* opToken, tInstBlock* currentInst, char* linebuff, eErrorType* errortype);
 
@@ -120,4 +119,5 @@ public:
 
     static eErrorType ProcessNoOperation(tInstBlock * currentInst);
 
+	static eErrorType ProcessInput(tInstBlock* currentInst, char* linebuffer);
 };
