@@ -19,4 +19,3 @@ bool ProcessAllConstDataMovInst(CROMBlock* myrom, std::map<uint32_t , std::strin
     std::map<std::string, uint32_t>* constDataLabelsMap);
 bool IsCommentLine(std::string& line);
 bool DoesFileExist(const wchar_t* filename);
-void CloseConsole();

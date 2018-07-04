@@ -468,7 +468,7 @@ eErrorType COpcode::ProcessInstOut(tInstBlock * currentInst, char * linebuffer)
 
 
     char * token = strtok(nullptr, " ,[]/");
-    logger(token);
+	logger(token);
     EliminateComments(token); EliminateTabs(token);
     int8_t reg = GetRegID(token);
 

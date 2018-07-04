@@ -56,16 +56,42 @@ void CErrorHandler::PrintErrorMessage(eErrorType errortype, unsigned long lineco
         break;
     case DATA_LABEL_NOT_FOUND:
         message = "Compiler Error , Not defined data Label : \"%s\"\n";
+		break;
+	case SPACES_IN_CONSTANT_ARITHMETIC_OPERATIONS_NOT_ALLOWED:
+		message = "Compiler Error , spaces in constant arithmetic operation are not allowed \"%s\"\n";
+		break;
+	case ONLY_NUMBERS_ALLOWED_IN_CONSTANT_ARITHMETIC_OPERATIONS:
+		message = "Compiler Error , only numbers allowed in constant arithmetic operations \"%s\"\n";
+		break;
+	case ONLY_ONE_OPERATION_ALLOWED_IN_CONSTANT_ARITHMETICS:
+		message = "Compiler Error , only one operation of add or sub is allowed in constant arithmetic operations \"%s\"\n";
+		break;
+	case FILE_NOT_FOUND:
+		message = "Compiler Error , File Not Found\n";
+		break;
+	case UNKNOWN_EXTENSION_ONLY_ASM_ALLOWED:
+		message = "Compiler Error , Unknown extension... Only \".asm\" is supported\n";
+		break;
     default:
         break;
     }
     if (message)
-    {
+    {		
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_INTENSITY);
         if (jmpOrDataLabel)
             printf(message, jmpOrDataLabel);
         else
             printf(message, linecount);
         printf("Press Enter to continue...\n");
         getchar();
+		CloseConsole();
     }
+}
+
+
+void CloseConsole()
+{
+	fclose(stdin);
+	fclose(stdout);
+	FreeConsole();
 }

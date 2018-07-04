@@ -26,7 +26,7 @@ enum eOpcode : uint8_t
     LOAD = 3,
     INDIRECT_IN = 4,
     INDIRECT_OUT = INDIRECT_IN,
-    //place holders
+
     ALU = 6,
     CALL = 7,
     COND_JUMP = 8,
@@ -55,7 +55,7 @@ enum eALUOpcode
     DEC,
     OR,
     AND,
-    iSUB,
+    iSUB, // sub with signed numbers
     DIV,
     MODULUS,
     MUL,
