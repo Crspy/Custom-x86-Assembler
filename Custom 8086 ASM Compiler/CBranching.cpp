@@ -19,14 +19,11 @@ eErrorType CBranching::ProcessUnCondJumpAndCall(tMemAddress* memadd, tInstBlock*
 
 
     char * token = strtok(nullptr, " [], \t");
-    logger(token);
     COpcode::EliminateComments(token); COpcode::EliminateTabs(token);
-    logger(token);
+    printf("UnCondJmpOperand:%s\n", token);
     if (is_numbers_only(token))
     {
-        //logger("Numbers ONLY");
         memadd->m_Address = strtol(token, nullptr, 0);
-        logger(token);
         if (!memadd->InsureJmpAddress())
         {
             return eErrorType::MEM_ADDRESS_EXCEEDS;
@@ -48,8 +45,6 @@ eErrorType CBranching::ProcessUnCondJumpAndCall(tMemAddress* memadd, tInstBlock*
     }
     else if (!DoesStringStartWithNumber(token)) 
     {
-        //logger("ALPHA ONLY");
-        //std::cin.get();
         memadd->m_bNeedLoading = true; // needs loading by default 
         currentInst[1].opcode = currentInst[0].opcode;
         currentInst[0].opcode = eOpcode::LOAD;
@@ -84,14 +79,11 @@ eErrorType CBranching::ProcessJumpIfFlag(tMemAddress * memadd, tInstBlock * curr
 
 
     char * token = strtok(nullptr, " [], \t");
-    logger(token);
     COpcode::EliminateComments(token); COpcode::EliminateTabs(token);
-    logger(token);
+    printf("CondJmpOperand:%s\n", token);
     if (is_numbers_only(token))
     {
-        //logger("Numbers ONLY");
         memadd->m_Address = strtol(token, nullptr, 0);
-        logger(token);
         if (!memadd->InsureJmpAddress())
         {
             return eErrorType::MEM_ADDRESS_EXCEEDS;
@@ -116,8 +108,6 @@ eErrorType CBranching::ProcessJumpIfFlag(tMemAddress * memadd, tInstBlock * curr
     }
     else if (!DoesStringStartWithNumber(token)) 
     {
-        //logger("ALPHA ONLY");
-        //std::cin.get();
         memadd->m_bNeedLoading = true; // needs loading by default 
 
         currentInst[1].const_condJump_opcode = currentInst[0].const_condJump_opcode;
@@ -164,15 +154,11 @@ eErrorType CBranching::ProcessJumpIfGreater(tMemAddress * memadd, tInstBlock * c
     nextJmpAddress.InsureJmpAddress();
 
     char * token = strtok(nullptr, " [], \t");
-    logger(token);
     COpcode::EliminateComments(token); COpcode::EliminateTabs(token);
-    logger(token);
+    printf("jg_Operand:%s\n", token);
     if (is_numbers_only(token))
-    {
-        
-        //logger("Numbers ONLY");
+    {    
         memadd->m_Address = strtol(token, nullptr, 0);
-        logger(token);
         if (!memadd->InsureJmpAddress())
         {
             return eErrorType::MEM_ADDRESS_EXCEEDS;
@@ -282,15 +268,12 @@ eErrorType CBranching::ProcessJumpIfLess(tMemAddress * memadd, tInstBlock * curr
     nextJmpAddress.InsureJmpAddress();
 
     char * token = strtok(nullptr, " [], \t");
-    logger(token);
     COpcode::EliminateComments(token); COpcode::EliminateTabs(token);
-    logger(token);
+    printf("jl_Operand:%s\n", token);
     if (is_numbers_only(token))
     {
         
-        //logger("Numbers ONLY");
         memadd->m_Address = strtol(token, nullptr, 0);
-        logger(token);
         if (!memadd->InsureJmpAddress())
         {
             return eErrorType::MEM_ADDRESS_EXCEEDS;
@@ -398,76 +381,62 @@ bool CBranching::ProcessBranchingOpcodes(char * opToken, tMemAddress * memadd, t
     
     if (_strcmpi(opToken, "call") == 0)
     {
-        logger("FOUND A JUMP");
         *errortype = CBranching::ProcessUnCondJumpAndCall(memadd, currentInst, linebuff, PC, jmplabelsmap , true);
     }
     else if (_strcmpi(opToken, "jmp") == 0)
     {
-        logger("FOUND A JUMP");
         *errortype = CBranching::ProcessUnCondJumpAndCall(memadd, currentInst, linebuff, PC, jmplabelsmap , false);
     }
     else if (_strcmpi(opToken, "je") == 0)
     {
-        logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfEqual(memadd, currentInst, linebuff, PC, jmplabelsmap, 
             eCheckFlag::FLAG_IF_TRUE);
     }
     else if (_strcmpi(opToken, "jne") == 0)
     {
-        logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfEqual(memadd, currentInst, linebuff, PC, jmplabelsmap,eCheckFlag::FLAG_IF_NOT);
     }
     else if (_strcmpi(opToken, "jz") == 0)
     {
-        logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfZero(memadd, currentInst, linebuff, PC, jmplabelsmap,eCheckFlag::FLAG_IF_TRUE);
     }
     else if (_strcmpi(opToken, "jnz") == 0)
     {
-        logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfZero(memadd, currentInst, linebuff, PC, jmplabelsmap,eCheckFlag::FLAG_IF_NOT);
     }
     else if (_strcmpi(opToken, "jo") == 0)
     {
-        logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfOverFlow(memadd, currentInst, linebuff, PC, jmplabelsmap,eCheckFlag::FLAG_IF_TRUE);
     }
     else if (_strcmpi(opToken, "jno") == 0)
     {
-        logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfOverFlow(memadd, currentInst, linebuff, PC, jmplabelsmap, eCheckFlag::FLAG_IF_NOT);
     }
     else if (_strcmpi(opToken, "js") == 0)
     {
-        logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfSigned(memadd, currentInst, linebuff, PC, jmplabelsmap, eCheckFlag::FLAG_IF_TRUE);
     }
     else if (_strcmpi(opToken, "jns") == 0)
     {
-        logger("FOUND A JUMP");
         *errortype = CBranching::ProcessJumpIfSigned(memadd, currentInst, linebuff, PC, jmplabelsmap, eCheckFlag::FLAG_IF_NOT);
     }
     else if (_strcmpi(opToken, "jg") == 0)
     {
-        logger("FOUND A JUMP");
         *bDoubleJmp = true;
         *errortype = CBranching::ProcessJumpIfGreater(memadd, currentInst, linebuff, PC, jmplabelsmap, eCheckFlag::FLAG_IF_TRUE);
     }
     else if (_strcmpi(opToken, "jge") == 0)
     {
-        logger("FOUND A JUMP");
         *bDoubleJmp = true;
         *errortype = CBranching::ProcessJumpIfGreater(memadd, currentInst, linebuff, PC, jmplabelsmap, eCheckFlag::FLAG_IF_TRUE_OR_EQUAL);
     }
     else if (_strcmpi(opToken, "jl") == 0)
     {
-        logger("FOUND A JUMP");
         *bDoubleJmp = true;
         *errortype = CBranching::ProcessJumpIfLess(memadd, currentInst, linebuff, PC, jmplabelsmap, eCheckFlag::FLAG_IF_TRUE);
     }
     else if (_strcmpi(opToken, "jle") == 0)
     {
-        logger("FOUND A JUMP");
         *bDoubleJmp = true;
         *errortype = CBranching::ProcessJumpIfLess(memadd, currentInst, linebuff, PC, jmplabelsmap, eCheckFlag::FLAG_IF_TRUE_OR_EQUAL);
 

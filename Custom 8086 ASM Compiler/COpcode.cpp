@@ -78,9 +78,9 @@ eErrorType COpcode::ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, 
     currentInst[0].dir_flag = eOpcodeDir::DIR_IN;
 
 
-    char * token = strtok(nullptr, " ,[]/");
-    logger(token);
+    char * token = strtok(nullptr, " ,[]/");    
     EliminateTabs(token);
+    printf("MoveIN_Operand1:%s\n", token);
     int8_t reg = GetRegID(token);
     if (reg == -1)
     {
@@ -88,8 +88,8 @@ eErrorType COpcode::ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, 
     }
 
     char* token2 = strtok(nullptr, ",[]/");
-    logger(token2);
     EliminateComments(token2); EliminateTabs(token2);
+    printf("MoveIN_Operand2:%s\n", token2);
     if (GetRegID(token2) >= 0)
     {
         return eErrorType::USING_REGNAME_INSTEAD_OF_ADDRESS;
@@ -99,7 +99,7 @@ eErrorType COpcode::ProcessMoveIN(tMemAddress* memadd, tInstBlock* currentInst, 
     {
         memadd->m_Address = strtol(token2, nullptr, 0);
 
-        printf("MOVEINADDRESS:%d\n",memadd->m_Address);
+        printf("MOVEIN_ADDRESS:%d\n",memadd->m_Address);
 
         if (!memadd->InsureMovAddress())
         {
@@ -150,7 +150,7 @@ eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst,
 
     char * token = strtok(nullptr, " [], \t");
     EliminateTabs(token);
-
+    printf("MoveOUT_Operand1:%s\n", token);
     if (GetRegID(token) >= 0)
     {
         return eErrorType::USING_REGNAME_INSTEAD_OF_ADDRESS;
@@ -161,12 +161,12 @@ eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst,
     char *token2 = strtok(nullptr, " [], \t");
     
     EliminateComments(token2); EliminateTabs(token2);
-
+    printf("MoveOUT_Operand2:%s\n", token2);
     int8_t reg = GetRegID(token2);
 
     if (reg != -1) // moving from ram to reg
     {
-        logger(token);
+
         if (is_numbers_only(token))
         {
                    
@@ -213,8 +213,7 @@ eErrorType COpcode::ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst,
         if (is_numbers_only(token2))
         {
             lvalue = strtol(token2, nullptr, 0);
-            logger("VALUE");
-            logger(lvalue);
+            printf("MoveOUT_DATA_Value:%d\n", lvalue);
         }
         else
         {
@@ -269,8 +268,8 @@ eErrorType COpcode::ProcessIndirectMoveOUT(tMemAddress* memadd, tInstBlock* curr
     currentInst[0].dir_flag = eOpcodeDir::DIR_OUT;
 
     char * token = strtok(nullptr, " [], \t");
-    logger(token);
     EliminateTabs(token);
+    printf("IndirectMoveOUT_Operand1:%s\n", token);
     int8_t reg2 = GetRegID(token);
     if (reg2 == -1 || reg2 != eRegID::BX) // then it's moving value to dataSeg
     {
@@ -278,8 +277,8 @@ eErrorType COpcode::ProcessIndirectMoveOUT(tMemAddress* memadd, tInstBlock* curr
     }
 
     token = strtok(nullptr, " [], \t");
-    logger(token);
     EliminateComments(token); EliminateTabs(token);
+    printf("IndirectMoveOUT_Operand2:%s\n", token);
     int8_t reg = GetRegID(token);
     if (reg == -1 || reg == eRegID::BX) // then it's moving value to dataSeg
     {
@@ -297,8 +296,8 @@ eErrorType COpcode::ProcessIndirectMoveIN(tMemAddress* memadd, tInstBlock* curre
     currentInst[0].dir_flag = eOpcodeDir::DIR_IN;
 
     char * token = strtok(nullptr, " [], \t");
-    logger(token);
     EliminateTabs(token);
+    printf("IndirectMoveIN_Operand1:%s\n", token);
     int8_t reg = GetRegID(token);
     if (reg == -1 || reg == eRegID::BX) // then it's moving value to dataSeg
     {
@@ -306,7 +305,8 @@ eErrorType COpcode::ProcessIndirectMoveIN(tMemAddress* memadd, tInstBlock* curre
     }
 
     token = strtok(nullptr, " [], \t");
-    logger(token);
+    EliminateComments(token); EliminateTabs(token);
+    printf("IndirectMoveIN_Operand2:%s\n", token);
 
     int8_t reg2 = GetRegID(token);
     if (reg2 == -1 || reg2 != eRegID::BX) // then it's moving value to dataSeg
@@ -324,6 +324,7 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
 {
 
     static uint32_t DataCounter = 0;
+
 
     
     *bMovingData = true;
@@ -347,6 +348,7 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
     //printf("capacity:%d\n",buffer.capacity());
     while (std::getline(ss,buffer,','))
     {          
+        printf("DataCount : %d\n", DataCounter);
         strcpy(linebuff, buffer.c_str());
         char* token = strtok(linebuff,"= \t");
         EliminateComments(token);
@@ -360,15 +362,14 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
             pos = buffer.find_last_of(delimiter);
             stoken = buffer.substr(0, pos);
             buffer.erase(0, pos + delimiter.length());
-            printf("buffer: >%s<\n", stoken.c_str());
+            //printf("buffer: >%s<\n", stoken.c_str());
             pos = stoken.length();
-            printf("tokenlegnth: >%d<\n", pos);
+            printf("ConstDataString_length:%d\n", pos);
             for (int i = 0; i <= pos; i++)  //  "<="   to print the null char as well
             {
                 int16_t usvalue = stoken[i];
-                logger(usvalue);
-                // swapping endianess
-                printf("DataCount : %d\n", DataCounter);
+                printf("ConstDataString_Value:%c\n", usvalue);
+                // swapping endianess                
                 *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(char*)&usvalue;
                 *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *((char*)& usvalue + 1);
                 DataCounter++;
@@ -383,15 +384,14 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
             pos = buffer.find_last_of(delimiter);
             stoken = buffer.substr(0, pos);
             buffer.erase(0, pos + delimiter.length());
-            printf("buffer: >%s<\n", stoken.c_str());
+            //printf("buffer: >%s<\n", stoken.c_str());
             pos = stoken.length();
-            printf("tokenlegnth: >%d<\n", pos);
+            printf("ConstDataString_length:%d\n", pos);
             for (int i = 0; i < pos; i++)   //  "<"   to not print the null char
             {
                 int16_t usvalue = stoken[i];
-                logger(usvalue);
+                printf("ConstDataCharacters_Value:%c\n", usvalue);
                 // swapping endianess
-                printf("DataCount : %d\n", DataCounter);
                 *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(char*)&usvalue;
                 *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *((char*)& usvalue + 1);
                 DataCounter++;
@@ -399,17 +399,21 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
         }
         else if (is_numbers_only(token))
         {
-            logger(token);
             long lvalue = strtol(token, nullptr, 0);
-            printf("lvalue>%ld<\n", lvalue);
+            printf("ConstData_Value:%c\n", lvalue);
             if (lvalue < 0) // negative number
             {
                 if (lvalue >= -32768)
                 {
                     const int16_t svalue = lvalue;
+                    printf("%d\n", lvalue);
+                    printf("usvalue high>%d<\n", *(char*)&svalue);
+                    printf("usvalue low>%d<\n", *((char*)& svalue + 1));
                     // swapping endianess
                     *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1) = *(char*)&svalue;
                     *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) = *((char*)& svalue + 1);
+                    printf("DataSegValue: %d\n", *(reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value) + 1));
+                    printf("DataSegValue: %d\n", *reinterpret_cast<char*>(&myrom->DataSeg[DataCounter].value));
                 }
                 else
                     return eErrorType::DATA_VALUE_OUTOFBOUNDS;
@@ -435,7 +439,7 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
             printf("token>%s<\n",token),
             constDataLabelsMap.find(token) != constDataLabelsMap.end())
         {
-            logger(token);
+            printf("DataLabelAssignedToAnotherLabel:%s\n",token);
             memadd->m_Address = constDataLabelsMap.at(token);
             memadd->InsureMovAddress();
             memadd->m_bNeedLoading = false; // to prevent PC from incrementing
@@ -450,13 +454,9 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
             constDataLabelsMap.erase(firstToken);
         }
         
-        //auto compos = buffer.find_first_of(';');
-        //buffer.at(compos) = '\0';
-         //pch = strtok(nullptr,","); 
 
     }
 
-    
     free(linebuff);
     return eErrorType::NO_ERROR_DETECTED;
 }
@@ -468,8 +468,9 @@ eErrorType COpcode::ProcessInstOut(tInstBlock * currentInst, char * linebuffer)
 
 
     char * token = strtok(nullptr, " ,[]/");
-	logger(token);
+    
     EliminateComments(token); EliminateTabs(token);
+    printf("iout_reg>%s<\n", token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
@@ -489,8 +490,9 @@ eErrorType COpcode::ProcessDataOut(tInstBlock * currentInst, char * linebuffer)
 
 
     char * token = strtok(nullptr, " ,[]/");
-    logger(token);
+    
     EliminateComments(token); EliminateTabs(token);
+    printf("dout_reg>%s<\n", token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
@@ -516,7 +518,7 @@ eErrorType COpcode::ProcessInput(tInstBlock * currentInst, char * linebuffer)
 	currentInst[0].dir_flag = eOpcodeDir::DIR_IN;
 
 	char * token = strtok(nullptr, " ,[]/");
-	logger(token);
+    printf("in_reg>%s<\n", token);
 	EliminateComments(token); EliminateTabs(token);
 	int8_t reg = GetRegID(token);
 
@@ -538,13 +540,12 @@ eErrorType COpcode::ProcessNot(tInstBlock* currentInst, char* linebuffer)
 
 
     char * token = strtok(nullptr, " [], \t");
-    printf(token);
     EliminateComments(token); EliminateTabs(token);
+    printf("not_reg>%s<\n", token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
     {
-        printf("%d\n",reg);
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
@@ -561,8 +562,9 @@ eErrorType COpcode::ProcessTransfer(tInstBlock* currentInst, char* linebuffer)
 
 
     char * token = strtok(nullptr, " ,[]/");
-    logger(token);
+    
     EliminateComments(token); EliminateTabs(token);
+    printf("transfer_reg>%s<\n", token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
@@ -583,8 +585,9 @@ eErrorType COpcode::ProcessInc(tInstBlock* currentInst, char* linebuffer)
 
 
     char * token = strtok(nullptr, " ,[]/");
-    logger(token);
+    
     EliminateComments(token); EliminateTabs(token);
+    printf("inc_reg>%s<\n", token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
@@ -605,8 +608,9 @@ eErrorType COpcode::ProcessDec(tInstBlock* currentInst, char* linebuffer)
 
 
     char * token = strtok(nullptr, " ,[]/");
-    logger(token);
+    
     EliminateComments(token); EliminateTabs(token);
+    printf("dec_reg>%s<\n", token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
@@ -615,6 +619,7 @@ eErrorType COpcode::ProcessDec(tInstBlock* currentInst, char* linebuffer)
     }
 
     currentInst[0].regALU_id = reg;
+
 
     return eErrorType::NO_ERROR_DETECTED;
 }
@@ -628,8 +633,8 @@ eErrorType COpcode::ProcessXor(tInstBlock* currentInst, char* linebuffer)
 
 
     char * token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateTabs(token);
+    printf("xor_reg1>%s<\n", token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
@@ -638,8 +643,8 @@ eErrorType COpcode::ProcessXor(tInstBlock* currentInst, char* linebuffer)
     }
 
     token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateComments(token); EliminateTabs(token);
+    printf("xor_reg2>%s<\n", token);
     int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
@@ -659,8 +664,8 @@ eErrorType COpcode::ProcessOR(tInstBlock* currentInst, char* linebuffer)
 
 
     char * token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateTabs(token);
+    printf("or_reg1>%s<\n", token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
@@ -669,8 +674,8 @@ eErrorType COpcode::ProcessOR(tInstBlock* currentInst, char* linebuffer)
     }
 
     token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateComments(token); EliminateTabs(token);
+    printf("or_reg2>%s<\n", token);
     int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
@@ -691,8 +696,8 @@ eErrorType COpcode::ProcessAND(tInstBlock* currentInst, char* linebuffer)
 
 
     char * token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateTabs(token);
+    printf("and_reg1>%s<\n", token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
@@ -701,8 +706,8 @@ eErrorType COpcode::ProcessAND(tInstBlock* currentInst, char* linebuffer)
     }
 
     token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateComments(token); EliminateTabs(token);
+    printf("and_reg2>%s<\n", token);
     int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
@@ -722,8 +727,8 @@ eErrorType COpcode::ProcessModulus(tInstBlock* currentInst, char* linebuffer)
 
 
     char * token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateTabs(token);
+    printf("mod_reg1>%s<\n", token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
@@ -732,8 +737,8 @@ eErrorType COpcode::ProcessModulus(tInstBlock* currentInst, char* linebuffer)
     }
 
     token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateComments(token); EliminateTabs(token);
+    printf("mod_reg2>%s<\n", token);
     int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
@@ -754,8 +759,8 @@ eErrorType COpcode::ProcessAdd(tInstBlock* currentInst, char* linebuffer)
 
 
     char * token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateTabs(token);
+    printf("add_reg1>%s<\n", token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
@@ -764,8 +769,8 @@ eErrorType COpcode::ProcessAdd(tInstBlock* currentInst, char* linebuffer)
     }
 
     token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateComments(token); EliminateTabs(token);
+    printf("add_reg2>%s<\n", token);
     int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
@@ -786,8 +791,8 @@ eErrorType COpcode::ProcessSub(tInstBlock* currentInst, char* linebuffer)
 
 
     char * token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateTabs(token);
+    printf("sub_reg1>%s<\n", token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
@@ -796,8 +801,8 @@ eErrorType COpcode::ProcessSub(tInstBlock* currentInst, char* linebuffer)
     }
 
     token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateComments(token); EliminateTabs(token);
+    printf("sub_reg2>%s<\n", token);
     int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
@@ -817,8 +822,8 @@ eErrorType COpcode::ProcessMul(tInstBlock* currentInst, char* linebuffer)
 
 
     char * token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateTabs(token);
+    printf("mul_reg1>%s<\n", token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
@@ -827,8 +832,8 @@ eErrorType COpcode::ProcessMul(tInstBlock* currentInst, char* linebuffer)
     }
 
     token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateComments(token); EliminateTabs(token);
+    printf("mul_reg2>%s<\n", token);
     int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
@@ -849,8 +854,8 @@ eErrorType COpcode::ProcessDiv(tInstBlock* currentInst, char* linebuffer)
 
 
     char * token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateTabs(token);
+    printf("div_reg1>%s<\n", token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
@@ -859,8 +864,8 @@ eErrorType COpcode::ProcessDiv(tInstBlock* currentInst, char* linebuffer)
     }
 
     token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateComments(token); EliminateTabs(token);
+    printf("div_reg2>%s<\n", token);
     int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
@@ -916,8 +921,8 @@ eErrorType COpcode::ProcessiSub(tInstBlock* currentInst, char* linebuffer)
 
 
     char * token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateTabs(token);
+    printf("iSub_reg1>%s<\n", token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
@@ -926,8 +931,8 @@ eErrorType COpcode::ProcessiSub(tInstBlock* currentInst, char* linebuffer)
     }
 
     token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateComments(token); EliminateTabs(token);
+    printf("iSub_reg2>%s<\n", token);
     int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
@@ -1012,8 +1017,8 @@ eErrorType COpcode::ProcessCompare(tInstBlock* currentInst, char* linebuffer)
 
 
     char * token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateTabs(token);
+    printf("cmp_reg1>%s<\n", token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
@@ -1022,8 +1027,8 @@ eErrorType COpcode::ProcessCompare(tInstBlock* currentInst, char* linebuffer)
     }
 
     token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateComments(token); EliminateTabs(token);
+    printf("cmp_reg2>%s<\n", token);
     int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
@@ -1043,8 +1048,8 @@ eErrorType COpcode::ProcessShiftLeft(tInstBlock* currentInst, char* linebuffer)
 
 
     char * token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateComments(token); EliminateTabs(token);
+    printf("shl_reg>%s<\n", token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
@@ -1065,8 +1070,8 @@ eErrorType COpcode::ProcessShiftRight(tInstBlock* currentInst, char* linebuffer)
 
 
     char * token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateComments(token); EliminateTabs(token);
+    printf("shr_reg>%s<\n", token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
