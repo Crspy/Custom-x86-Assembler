@@ -46,6 +46,8 @@ enum eOpcodeDir : uint8_t
 
 enum eALUOpcode
 {
+    
+
     ADD,
     NOT,
     TRANSFER,
@@ -55,13 +57,34 @@ enum eALUOpcode
     DEC,
     OR,
     AND,
-    iSUB, // sub with signed numbers
+    RSUB, // reversed sub
     DIV,
     MODULUS,
     MUL,
     SHIFT_RIGHT,
     SHIFT_LEFT,
     COMPARE,
+
+/*
+    iADD,
+    iNOT,
+    iTRANSFER,
+    iINC,
+    iXOR,
+    iSUB,
+    iDEC,
+    iOR,
+    iAND,
+    iRSUB, // reversed sub
+    iDIV,
+    iMODULUS,
+    iMUL,
+    iSHIFT_RIGHT,
+    iSHIFT_LEFT,
+    iCOMPARE,
+    */
+
+
 };
 
 
@@ -100,12 +123,30 @@ public:
 
     static eErrorType ProcessAdd(tInstBlock* currentInst, char* linebuffer);
     static eErrorType ProcessSub(tInstBlock* currentInst, char* linebuffer);
+    static eErrorType ProcessReversedSub(tInstBlock* currentInst, char* linebuffer);
     static eErrorType ProcessMul(tInstBlock* currentInst, char* linebuffer);
-    static eErrorType ProcessDiv(tInstBlock* currentInst, char* linebuffer);
-    //static eErrorType ProcessiAdd(tInstBlock* currentInst, char* linebuffer);
+    static eErrorType ProcessDiv(tInstBlock* currentInst, char* linebuffer);    
+
+
+/*
+    static eErrorType ProcessiCompare(tInstBlock* currentInst, char* linebuffer);
+    static eErrorType ProcessiShiftRight(tInstBlock* currentInst, char* linebuffer);
+    static eErrorType ProcessiShiftLeft(tInstBlock* currentInst, char* linebuffer);
+    static eErrorType ProcessiNot(tInstBlock* currentInst, char* linebuffer);
+    static eErrorType ProcessiTransfer(tInstBlock* currentInst, char* linebuffer);
+    static eErrorType ProcessiInc(tInstBlock* currentInst, char* linebuffer);
+    static eErrorType ProcessiDec(tInstBlock* currentInst, char* linebuffer);
+    static eErrorType ProcessiXor(tInstBlock* currentInst, char* linebuffer);
+    static eErrorType ProcessiOR(tInstBlock* currentInst, char* linebuffer);
+    static eErrorType ProcessiAND(tInstBlock* currentInst, char* linebuffer);
+    static eErrorType ProcessiModulus(tInstBlock* currentInst, char* linebuffer);
+
+    static eErrorType ProcessiAdd(tInstBlock* currentInst, char* linebuffer);
     static eErrorType ProcessiSub(tInstBlock* currentInst, char* linebuffer);
-    //static eErrorType ProcessiMul(tInstBlock* currentInst, char* linebuffer);
-    //static eErrorType ProcessiDiv(tInstBlock* currentInst, char* linebuffer);
+    static eErrorType ProcessiReversedSub(tInstBlock* currentInst, char* linebuffer);
+    static eErrorType ProcessiMul(tInstBlock* currentInst, char* linebuffer);
+    static eErrorType ProcessiDiv(tInstBlock* currentInst, char* linebuffer);
+*/
 
     static bool ProcessALUOpcodes(char* opToken, tInstBlock* currentInst, char* linebuff, eErrorType* errortype);
 

@@ -39,19 +39,30 @@ public:
     static eErrorType ProcessJumpIfFlag(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
         std::map<uint32_t , std::string>& jmplabelsmap,eCheckFlag checkflag,eJumpFlag jumpflag);
 
-    // for jmp if greater ,  jmp if greater or equal
+    // for jmp if greater ,  jmp if greater or equal  ( for signed numbers )
     static eErrorType ProcessJumpIfGreater(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
         std::map<uint32_t , std::string>& jmplabelsmap,eCheckFlag checkflag);
 
-    // for jmp if lesser ,  jmp if lesser or equal
+    // for jmp if above ,  jmp if above or equal  ( for unsigned numbers )
+    static eErrorType ProcessJumpIfAbove(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
+        std::map<uint32_t, std::string>& jmplabelsmap, eCheckFlag checkflag);
+
+    // for jmp if lesser ,  jmp if lesser or equal  ( for signed numbers )
     static eErrorType ProcessJumpIfLess(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
         std::map<uint32_t , std::string>& jmplabelsmap, eCheckFlag checkflag);
+
+    // for jmp if below ,  jmp if below or equal  ( for unsigned numbers )
+    static eErrorType ProcessJumpIfBelow(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
+        std::map<uint32_t, std::string>& jmplabelsmap, eCheckFlag checkflag);
 
     static eErrorType ProcessJumpIfOverFlow(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
         std::map<uint32_t , std::string>& jmplabelsmap,eCheckFlag checkflag);
 
     static eErrorType ProcessJumpIfSigned(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
         std::map<uint32_t , std::string>& jmplabelsmap,eCheckFlag checkflag);
+
+    static eErrorType ProcessJumpIfCarry(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer, uint32_t PC,
+        std::map<uint32_t, std::string>& jmplabelsmap, eCheckFlag checkflag);
 
     static eErrorType ProcessReturn(tInstBlock * currentInst);
 

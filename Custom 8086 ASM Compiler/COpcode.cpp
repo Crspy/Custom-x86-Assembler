@@ -553,6 +553,29 @@ eErrorType COpcode::ProcessNot(tInstBlock* currentInst, char* linebuffer)
 
     return eErrorType::NO_ERROR_DETECTED;
 }
+/*
+eErrorType COpcode::ProcessiNot(tInstBlock* currentInst, char* linebuffer)
+{
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
+    currentInst[0].alu_op = eALUOpcode::iNOT;
+    currentInst[0].always_1 = 1;
+
+
+    char * token = strtok(nullptr, " [], \t");
+    EliminateComments(token); EliminateTabs(token);
+    printf("inot_reg>%s<\n", token);
+    int8_t reg = GetRegID(token);
+
+    if (reg == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+
+    currentInst[0].regALU_id = reg;
+
+    return eErrorType::NO_ERROR_DETECTED;
+}
+*/
 
 eErrorType COpcode::ProcessTransfer(tInstBlock* currentInst, char* linebuffer)
 {
@@ -576,7 +599,30 @@ eErrorType COpcode::ProcessTransfer(tInstBlock* currentInst, char* linebuffer)
 
     return eErrorType::NO_ERROR_DETECTED;
 }
+/*
+eErrorType COpcode::ProcessiTransfer(tInstBlock* currentInst, char* linebuffer)
+{
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
+    currentInst[0].alu_op = eALUOpcode::iTRANSFER;
+    currentInst[0].always_1 = 1;
 
+
+    char * token = strtok(nullptr, " ,[]/");
+
+    EliminateComments(token); EliminateTabs(token);
+    printf("itransfer_reg>%s<\n", token);
+    int8_t reg = GetRegID(token);
+
+    if (reg == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+
+    currentInst[0].regALU_id = reg;
+
+    return eErrorType::NO_ERROR_DETECTED;
+}
+*/
 eErrorType COpcode::ProcessInc(tInstBlock* currentInst, char* linebuffer)
 {
     currentInst[0].const_ALU_opcode = eOpcode::ALU;
@@ -599,7 +645,30 @@ eErrorType COpcode::ProcessInc(tInstBlock* currentInst, char* linebuffer)
 
     return eErrorType::NO_ERROR_DETECTED;
 }
+/*
+eErrorType COpcode::ProcessiInc(tInstBlock* currentInst, char* linebuffer)
+{
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
+    currentInst[0].alu_op = eALUOpcode::iINC;
+    currentInst[0].always_1 = 1;
 
+
+    char * token = strtok(nullptr, " ,[]/");
+
+    EliminateComments(token); EliminateTabs(token);
+    printf("iinc_reg>%s<\n", token);
+    int8_t reg = GetRegID(token);
+
+    if (reg == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+
+    currentInst[0].regALU_id = reg;
+
+    return eErrorType::NO_ERROR_DETECTED;
+}
+*/
 eErrorType COpcode::ProcessDec(tInstBlock* currentInst, char* linebuffer)
 {
     currentInst[0].const_ALU_opcode = eOpcode::ALU;
@@ -623,7 +692,31 @@ eErrorType COpcode::ProcessDec(tInstBlock* currentInst, char* linebuffer)
 
     return eErrorType::NO_ERROR_DETECTED;
 }
+/*
+eErrorType COpcode::ProcessiDec(tInstBlock* currentInst, char* linebuffer)
+{
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
+    currentInst[0].alu_op = eALUOpcode::iDEC;
+    currentInst[0].always_1 = 1;
 
+
+    char * token = strtok(nullptr, " ,[]/");
+
+    EliminateComments(token); EliminateTabs(token);
+    printf("idec_reg>%s<\n", token);
+    int8_t reg = GetRegID(token);
+
+    if (reg == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+
+    currentInst[0].regALU_id = reg;
+
+
+    return eErrorType::NO_ERROR_DETECTED;
+}
+*/
 
 eErrorType COpcode::ProcessXor(tInstBlock* currentInst, char* linebuffer)
 {
@@ -655,7 +748,38 @@ eErrorType COpcode::ProcessXor(tInstBlock* currentInst, char* linebuffer)
 
     return eErrorType::NO_ERROR_DETECTED;
 }
+/*
+eErrorType COpcode::ProcessiXor(tInstBlock* currentInst, char* linebuffer)
+{
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
+    currentInst[0].alu_op = eALUOpcode::iXOR;
+    currentInst[0].always_1 = 1;
 
+
+    char * token = strtok(nullptr, " ,[]/");
+    EliminateTabs(token);
+    printf("ixor_reg1>%s<\n", token);
+    int8_t reg = GetRegID(token);
+
+    if (reg == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+
+    token = strtok(nullptr, " ,[]/");
+    EliminateComments(token); EliminateTabs(token);
+    printf("ixor_reg2>%s<\n", token);
+    int8_t reg2 = GetRegID(token);
+    if (reg2 == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+    currentInst[0].regALU_id = reg;
+    currentInst[0].reg2ALU_id = reg2;
+
+    return eErrorType::NO_ERROR_DETECTED;
+}
+*/
 eErrorType COpcode::ProcessOR(tInstBlock* currentInst, char* linebuffer)
 {
     currentInst[0].const_ALU_opcode = eOpcode::ALU;
@@ -686,7 +810,38 @@ eErrorType COpcode::ProcessOR(tInstBlock* currentInst, char* linebuffer)
 
     return eErrorType::NO_ERROR_DETECTED;
 }
+/*
+eErrorType COpcode::ProcessiOR(tInstBlock* currentInst, char* linebuffer)
+{
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
+    currentInst[0].alu_op = eALUOpcode::iOR;
+    currentInst[0].always_1 = 1;
 
+
+    char * token = strtok(nullptr, " ,[]/");
+    EliminateTabs(token);
+    printf("iOr_reg1>%s<\n", token);
+    int8_t reg = GetRegID(token);
+
+    if (reg == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+
+    token = strtok(nullptr, " ,[]/");
+    EliminateComments(token); EliminateTabs(token);
+    printf("iOr_reg2>%s<\n", token);
+    int8_t reg2 = GetRegID(token);
+    if (reg2 == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+    currentInst[0].regALU_id = reg;
+    currentInst[0].reg2ALU_id = reg2;
+
+    return eErrorType::NO_ERROR_DETECTED;
+}
+*/
 
 eErrorType COpcode::ProcessAND(tInstBlock* currentInst, char* linebuffer)
 {
@@ -718,7 +873,38 @@ eErrorType COpcode::ProcessAND(tInstBlock* currentInst, char* linebuffer)
 
     return eErrorType::NO_ERROR_DETECTED;
 }
+/*
+eErrorType COpcode::ProcessiAND(tInstBlock* currentInst, char* linebuffer)
+{
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
+    currentInst[0].alu_op = eALUOpcode::iAND;
+    currentInst[0].always_1 = 1;
 
+
+    char * token = strtok(nullptr, " ,[]/");
+    EliminateTabs(token);
+    printf("iand_reg1>%s<\n", token);
+    int8_t reg = GetRegID(token);
+
+    if (reg == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+
+    token = strtok(nullptr, " ,[]/");
+    EliminateComments(token); EliminateTabs(token);
+    printf("iand_reg2>%s<\n", token);
+    int8_t reg2 = GetRegID(token);
+    if (reg2 == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+    currentInst[0].regALU_id = reg;
+    currentInst[0].reg2ALU_id = reg2;
+
+    return eErrorType::NO_ERROR_DETECTED;
+}
+*/
 eErrorType COpcode::ProcessModulus(tInstBlock* currentInst, char* linebuffer)
 {
     currentInst[0].const_ALU_opcode = eOpcode::ALU;
@@ -749,8 +935,38 @@ eErrorType COpcode::ProcessModulus(tInstBlock* currentInst, char* linebuffer)
 
     return eErrorType::NO_ERROR_DETECTED;
 }
+/*
+eErrorType COpcode::ProcessiModulus(tInstBlock* currentInst, char* linebuffer)
+{
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
+    currentInst[0].alu_op = eALUOpcode::iMODULUS;
+    currentInst[0].always_1 = 1;
 
 
+    char * token = strtok(nullptr, " ,[]/");
+    EliminateTabs(token);
+    printf("imod_reg1>%s<\n", token);
+    int8_t reg = GetRegID(token);
+
+    if (reg == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+
+    token = strtok(nullptr, " ,[]/");
+    EliminateComments(token); EliminateTabs(token);
+    printf("imod_reg2>%s<\n", token);
+    int8_t reg2 = GetRegID(token);
+    if (reg2 == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+    currentInst[0].regALU_id = reg;
+    currentInst[0].reg2ALU_id = reg2;
+
+    return eErrorType::NO_ERROR_DETECTED;
+}
+*/
 eErrorType COpcode::ProcessAdd(tInstBlock* currentInst, char* linebuffer)
 {
     currentInst[0].const_ALU_opcode = eOpcode::ALU;
@@ -781,7 +997,38 @@ eErrorType COpcode::ProcessAdd(tInstBlock* currentInst, char* linebuffer)
 
     return eErrorType::NO_ERROR_DETECTED;
 }
+/*
+eErrorType COpcode::ProcessiAdd(tInstBlock* currentInst, char* linebuffer)
+{
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
+    currentInst[0].alu_op = eALUOpcode::iADD;
+    currentInst[0].always_1 = 1;
 
+
+    char * token = strtok(nullptr, " ,[]/");
+    EliminateTabs(token);
+    printf("iadd_reg1>%s<\n", token);
+    int8_t reg = GetRegID(token);
+
+    if (reg == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+
+    token = strtok(nullptr, " ,[]/");
+    EliminateComments(token); EliminateTabs(token);
+    printf("iadd_reg2>%s<\n", token);
+    int8_t reg2 = GetRegID(token);
+    if (reg2 == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+    currentInst[0].regALU_id = reg;
+    currentInst[0].reg2ALU_id = reg2;
+
+    return eErrorType::NO_ERROR_DETECTED;
+}
+*/
 
 eErrorType COpcode::ProcessSub(tInstBlock* currentInst, char* linebuffer)
 {
@@ -813,7 +1060,38 @@ eErrorType COpcode::ProcessSub(tInstBlock* currentInst, char* linebuffer)
 
     return eErrorType::NO_ERROR_DETECTED;
 }
+/*
+eErrorType COpcode::ProcessiSub(tInstBlock* currentInst, char* linebuffer)
+{
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
+    currentInst[0].alu_op = eALUOpcode::iSUB;
+    currentInst[0].always_1 = 1;
 
+
+    char * token = strtok(nullptr, " ,[]/");
+    EliminateTabs(token);
+    printf("isub_reg1>%s<\n", token);
+    int8_t reg = GetRegID(token);
+
+    if (reg == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+
+    token = strtok(nullptr, " ,[]/");
+    EliminateComments(token); EliminateTabs(token);
+    printf("isub_reg2>%s<\n", token);
+    int8_t reg2 = GetRegID(token);
+    if (reg2 == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+    currentInst[0].regALU_id = reg;
+    currentInst[0].reg2ALU_id = reg2;
+
+    return eErrorType::NO_ERROR_DETECTED;
+}
+*/
 eErrorType COpcode::ProcessMul(tInstBlock* currentInst, char* linebuffer)
 {
     currentInst[0].const_ALU_opcode = eOpcode::ALU;
@@ -844,7 +1122,38 @@ eErrorType COpcode::ProcessMul(tInstBlock* currentInst, char* linebuffer)
 
     return eErrorType::NO_ERROR_DETECTED;
 }
+/*
+eErrorType COpcode::ProcessiMul(tInstBlock* currentInst, char* linebuffer)
+{
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
+    currentInst[0].alu_op = eALUOpcode::iMUL;
+    currentInst[0].always_1 = 1;
 
+
+    char * token = strtok(nullptr, " ,[]/");
+    EliminateTabs(token);
+    printf("imul_reg1>%s<\n", token);
+    int8_t reg = GetRegID(token);
+
+    if (reg == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+
+    token = strtok(nullptr, " ,[]/");
+    EliminateComments(token); EliminateTabs(token);
+    printf("imul_reg2>%s<\n", token);
+    int8_t reg2 = GetRegID(token);
+    if (reg2 == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+    currentInst[0].regALU_id = reg;
+    currentInst[0].reg2ALU_id = reg2;
+
+    return eErrorType::NO_ERROR_DETECTED;
+}
+*/
 
 eErrorType COpcode::ProcessDiv(tInstBlock* currentInst, char* linebuffer)
 {
@@ -876,31 +1185,28 @@ eErrorType COpcode::ProcessDiv(tInstBlock* currentInst, char* linebuffer)
 
     return eErrorType::NO_ERROR_DETECTED;
 }
-
 /*
-eErrorType COpcode::ProcessiAdd(tInstBlock* currentInst, char* linebuffer)
+eErrorType COpcode::ProcessiDiv(tInstBlock* currentInst, char* linebuffer)
 {
-    int8_t reg;
-    int8_t reg2;
-    char * token;
-    currentInst[0].opcode = eOpcode::ALU;
-    currentInst[0].alu_op = eALUOpcode::iADD;
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
+    currentInst[0].alu_op = eALUOpcode::iDIV;
+    currentInst[0].always_1 = 1;
 
 
-    token = strtok(NULL, " ,[]/");
-    logger(token);
+    char * token = strtok(nullptr, " ,[]/");
     EliminateTabs(token);
-    reg = GetRegID(token);
+    printf("idiv_reg1>%s<\n", token);
+    int8_t reg = GetRegID(token);
 
     if (reg == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
-    token = strtok(NULL, " ,[]/");
-    logger(token);
+    token = strtok(nullptr, " ,[]/");
     EliminateComments(token); EliminateTabs(token);
-    reg2 = GetRegID(token);
+    printf("idiv_reg2>%s<\n", token);
+    int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
         return eErrorType::UNKNOWN_REG_NAME;
@@ -912,17 +1218,16 @@ eErrorType COpcode::ProcessiAdd(tInstBlock* currentInst, char* linebuffer)
 }
 */
 
-
-eErrorType COpcode::ProcessiSub(tInstBlock* currentInst, char* linebuffer)
+eErrorType COpcode::ProcessReversedSub(tInstBlock* currentInst, char* linebuffer)
 {
     currentInst[0].const_ALU_opcode = eOpcode::ALU;
-    currentInst[0].alu_op = eALUOpcode::iSUB;
+    currentInst[0].alu_op = eALUOpcode::RSUB;
     currentInst[0].always_1 = 1;
 
 
     char * token = strtok(nullptr, " ,[]/");
     EliminateTabs(token);
-    printf("iSub_reg1>%s<\n", token);
+    printf("rSub_reg1>%s<\n", token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
@@ -932,7 +1237,7 @@ eErrorType COpcode::ProcessiSub(tInstBlock* currentInst, char* linebuffer)
 
     token = strtok(nullptr, " ,[]/");
     EliminateComments(token); EliminateTabs(token);
-    printf("iSub_reg2>%s<\n", token);
+    printf("rSub_reg2>%s<\n", token);
     int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
@@ -945,48 +1250,16 @@ eErrorType COpcode::ProcessiSub(tInstBlock* currentInst, char* linebuffer)
 }
 
 /*
-eErrorType COpcode::ProcessiMul(tInstBlock* currentInst, char* linebuffer)
-{
-    int8_t reg;
-    int8_t reg2;
-    char * token;
-    currentInst[0].opcode = eOpcode::ALU;
-    currentInst[0].alu_op = eALUOpcode::iMUL;
-
-
-    token = strtok(NULL, " ,[]/");
-    logger(token);
-    EliminateTabs(token);
-    reg = GetRegID(token);
-
-    if (reg == -1)
-    {
-        return eErrorType::UNKNOWN_REG_NAME;
-    }
-
-    token = strtok(NULL, " ,[]/");
-    logger(token);
-    EliminateComments(token); EliminateTabs(token);
-    reg2 = GetRegID(token);
-    if (reg2 == -1)
-    {
-        return eErrorType::UNKNOWN_REG_NAME;
-    }
-    currentInst[0].regALU_id = reg;
-    currentInst[0].reg2ALU_id = reg2;
-
-    return eErrorType::NO_ERROR_DETECTED;
-}
-
-eErrorType COpcode::ProcessiDiv(tInstBlock* currentInst, char* linebuffer)
+eErrorType COpcode::ProcessiReversedSub(tInstBlock* currentInst, char* linebuffer)
 {
     currentInst[0].const_ALU_opcode = eOpcode::ALU;
-    currentInst[0].alu_op = eALUOpcode::iDIV;
+    currentInst[0].alu_op = eALUOpcode::iRSUB;
     currentInst[0].always_1 = 1;
 
+
     char * token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateTabs(token);
+    printf("irSub_reg1>%s<\n", token);
     int8_t reg = GetRegID(token);
 
     if (reg == -1)
@@ -995,8 +1268,8 @@ eErrorType COpcode::ProcessiDiv(tInstBlock* currentInst, char* linebuffer)
     }
 
     token = strtok(nullptr, " ,[]/");
-    logger(token);
     EliminateComments(token); EliminateTabs(token);
+    printf("irSub_reg2>%s<\n", token);
     int8_t reg2 = GetRegID(token);
     if (reg2 == -1)
     {
@@ -1039,7 +1312,38 @@ eErrorType COpcode::ProcessCompare(tInstBlock* currentInst, char* linebuffer)
 
     return eErrorType::NO_ERROR_DETECTED;
 }
+/*
+eErrorType COpcode::ProcessiCompare(tInstBlock* currentInst, char* linebuffer)
+{
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
+    currentInst[0].alu_op = eALUOpcode::iCOMPARE;
+    currentInst[0].always_1 = 1;
 
+
+    char * token = strtok(nullptr, " ,[]/");
+    EliminateTabs(token);
+    printf("icmp_reg1>%s<\n", token);
+    int8_t reg = GetRegID(token);
+
+    if (reg == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+
+    token = strtok(nullptr, " ,[]/");
+    EliminateComments(token); EliminateTabs(token);
+    printf("icmp_reg2>%s<\n", token);
+    int8_t reg2 = GetRegID(token);
+    if (reg2 == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+    currentInst[0].regALU_id = reg;
+    currentInst[0].reg2ALU_id = reg2;
+
+    return eErrorType::NO_ERROR_DETECTED;
+}
+*/
 eErrorType COpcode::ProcessShiftLeft(tInstBlock* currentInst, char* linebuffer)
 {
     currentInst[0].const_ALU_opcode = eOpcode::ALU;
@@ -1061,7 +1365,29 @@ eErrorType COpcode::ProcessShiftLeft(tInstBlock* currentInst, char* linebuffer)
 
     return eErrorType::NO_ERROR_DETECTED;
 }
+/*
+eErrorType COpcode::ProcessiShiftLeft(tInstBlock* currentInst, char* linebuffer)
+{
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
+    currentInst[0].alu_op = eALUOpcode::iSHIFT_LEFT;
+    currentInst[0].always_1 = 1;
 
+
+    char * token = strtok(nullptr, " ,[]/");
+    EliminateComments(token); EliminateTabs(token);
+    printf("ishl_reg>%s<\n", token);
+    int8_t reg = GetRegID(token);
+
+    if (reg == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+
+    currentInst[0].regALU_id = reg;
+
+    return eErrorType::NO_ERROR_DETECTED;
+}
+*/
 eErrorType COpcode::ProcessShiftRight(tInstBlock* currentInst, char* linebuffer)
 {
     currentInst[0].const_ALU_opcode = eOpcode::ALU;
@@ -1084,7 +1410,30 @@ eErrorType COpcode::ProcessShiftRight(tInstBlock* currentInst, char* linebuffer)
 
     return eErrorType::NO_ERROR_DETECTED;
 }
+/*
+eErrorType COpcode::ProcessiShiftRight(tInstBlock* currentInst, char* linebuffer)
+{
+    currentInst[0].const_ALU_opcode = eOpcode::ALU;
+    currentInst[0].alu_op = eALUOpcode::iSHIFT_RIGHT;
+    currentInst[0].always_1 = 1;
 
+
+    char * token = strtok(nullptr, " ,[]/");
+    EliminateComments(token); EliminateTabs(token);
+    printf("ishr_reg>%s<\n", token);
+    int8_t reg = GetRegID(token);
+
+    if (reg == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+
+    currentInst[0].regALU_id = reg;
+
+
+    return eErrorType::NO_ERROR_DETECTED;
+}
+*/
 bool COpcode::ProcessALUOpcodes(char* opToken,tInstBlock* currentInst, char* linebuff,eErrorType* errortype)
 {
     if (_strcmpi(opToken, "add") == 0)
@@ -1129,6 +1478,10 @@ bool COpcode::ProcessALUOpcodes(char* opToken,tInstBlock* currentInst, char* lin
     {
         *errortype = COpcode::ProcessSub(currentInst, linebuff);
     }
+    else if (_strcmpi(opToken, "rsub") == 0)
+    {
+        *errortype = COpcode::ProcessReversedSub(currentInst, linebuff);
+    }
     else if (_strcmpi(opToken, "mul") == 0)
     {
         *errortype = COpcode::ProcessMul(currentInst, linebuff);
@@ -1137,29 +1490,6 @@ bool COpcode::ProcessALUOpcodes(char* opToken,tInstBlock* currentInst, char* lin
     {
         *errortype = COpcode::ProcessDiv(currentInst, linebuff);
     }
-    /*
-    else if (_strcmpi(opToken, "iadd") == 0)
-    {
-        errortype = COpcode::ProcessiAdd(currentInst, linebuff);
-    }
-    }
-    */
-    else if (_strcmpi(opToken, "isub") == 0)
-    {
-        *errortype = COpcode::ProcessiSub(currentInst, linebuff);
-    }
-    /*
-    else if (_strcmpi(opToken, "imul") == 0)
-    {
-        errortype = COpcode::ProcessiMul(currentInst, linebuff);
-    }
-    }
-    
-    else if (_strcmpi(opToken, "idiv") == 0)
-    {
-        *errortype = COpcode::ProcessiDiv(currentInst, linebuff);
-    }
-    */
     else if (_strcmpi(opToken, "shr") == 0)
     {
         *errortype = COpcode::ProcessShiftRight(currentInst, linebuff);
@@ -1172,7 +1502,74 @@ bool COpcode::ProcessALUOpcodes(char* opToken,tInstBlock* currentInst, char* lin
     {
         *errortype = COpcode::ProcessCompare(currentInst, linebuff);
     }
+/*
+    else if (_strcmpi(opToken, "iadd") == 0)
+    {
+        *errortype = COpcode::ProcessiAdd(currentInst, linebuff);
+    }
+    else if (_strcmpi(opToken, "inot") == 0)
+    {
+        *errortype = COpcode::ProcessiNot(currentInst, linebuff);
+    }
+    else if (_strcmpi(opToken, "itrans") == 0)
+    {
+    errortype = COpcode::ProcessiTransfer(currentInst, linebuff);
+    }
+    else if (_strcmpi(opToken, "iinc") == 0)
+    {
+        *errortype = COpcode::ProcessiInc(currentInst, linebuff);
+    }
+    else if (_strcmpi(opToken, "dec") == 0)
+    {
+        *errortype = COpcode::ProcessDec(currentInst, linebuff);
+    }
+    else if (_strcmpi(opToken, "ixor") == 0)
+    {
+        *errortype = COpcode::ProcessiXor(currentInst, linebuff);
+    }
+    else if (_strcmpi(opToken, "ior") == 0)
+    {
+        *errortype = COpcode::ProcessiOR(currentInst, linebuff);
+    }
+    else if (_strcmpi(opToken, "iand") == 0)
+    {
+        *errortype = COpcode::ProcessiAND(currentInst, linebuff);
+    }
+    else if (_strcmpi(opToken, "imod") == 0)
+    {
+        *errortype = COpcode::ProcessiModulus(currentInst, linebuff);
+    }
+    else if (_strcmpi(opToken, "isub") == 0)
+    {
+        *errortype = COpcode::ProcessiSub(currentInst, linebuff);
+    }
+    else if (_strcmpi(opToken, "irsub") == 0)
+    {
+        *errortype = COpcode::ProcessiReversedSub(currentInst, linebuff);
+    }
+    else if (_strcmpi(opToken, "imul") == 0)
+    {
+        *errortype = COpcode::ProcessiMul(currentInst, linebuff);
+    }
+    else if (_strcmpi(opToken, "idiv") == 0)
+    {
+        *errortype = COpcode::ProcessiDiv(currentInst, linebuff);
+    }
+    else if (_strcmpi(opToken, "ishr") == 0)
+    {
+        *errortype = COpcode::ProcessiShiftRight(currentInst, linebuff);
+    }
+    else if (_strcmpi(opToken, "ishl") == 0)
+    {
+        *errortype = COpcode::ProcessiShiftLeft(currentInst, linebuff);
+    }
+    else if (_strcmpi(opToken, "icmp") == 0)
+    {
+        *errortype = COpcode::ProcessiCompare(currentInst, linebuff);
+    }
+*/
     else
+        
         return false; // not an ALU opcode
 
     
