@@ -1,6 +1,6 @@
 /*
     Custom 8086 ASM Compiler
-    Author : Crspy
+    Author : Amr Zaki ( aka Crspy )
     Do not delete this comment block. Respect others' work!
 */
 
@@ -10,6 +10,16 @@ struct tInstBlock
 {
     union
     {
+        struct
+        { //  for I/O DATA
+            uint16_t IO_reg_id : 2;
+            uint16_t IO_dir_flag : 1; // 0 - in  ,  1 - out
+            uint16_t IO_opcode : 5;
+          
+            uint16_t always_0 : 7;
+            uint16_t OUT_type : 1; // 0 - inst ,  1 - data  , only used in  iout , dout
+        };
+
         struct
         {
             uint16_t reg_id : 2;
@@ -29,7 +39,7 @@ struct tInstBlock
         };
 
         struct
-        {   
+        { 
             uint16_t jmp_Flag : 2;
             uint16_t IfCheck_Flag : 1;
             uint16_t const_condJump_opcode : 5; // always 8

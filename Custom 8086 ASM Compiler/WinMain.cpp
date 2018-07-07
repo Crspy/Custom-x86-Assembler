@@ -1,6 +1,6 @@
 /*
     Custom 8086 ASM Compiler
-    Author : Crspy
+    Author : Amr Zaki ( aka Crspy )
     Do not delete this comment block. Respect others' work!
 */
 

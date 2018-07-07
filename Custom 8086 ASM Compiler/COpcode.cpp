@@ -1,6 +1,6 @@
 /*
     Custom 8086 ASM Compiler
-    Author : Crspy
+    Author : Amr Zaki ( aka Crspy )
     Do not delete this comment block. Respect others' work!
 */
 
@@ -463,8 +463,9 @@ eErrorType COpcode::ProcessConstData(tMemAddress* memadd, tInstBlock* currentIns
 
 eErrorType COpcode::ProcessInstOut(tInstBlock * currentInst, char * linebuffer)
 {
-    currentInst[0].opcode = eOpcode::INSTRUCTION_OUT;
-    currentInst[0].dir_flag = eOpcodeDir::DIR_OUT;
+    currentInst[0].IO_opcode = eOpcode::DATA_OUT;
+    currentInst[0].IO_dir_flag = eOpcodeDir::DIR_OUT;
+    currentInst[0].IO_dir_flag = 0;
 
 
     char * token = strtok(nullptr, " ,[]/");
@@ -478,15 +479,16 @@ eErrorType COpcode::ProcessInstOut(tInstBlock * currentInst, char * linebuffer)
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
-    currentInst[0].reg_id = reg;
+    currentInst[0].IO_reg_id = reg;
 
     return eErrorType::NO_ERROR_DETECTED;
 }
 
 eErrorType COpcode::ProcessDataOut(tInstBlock * currentInst, char * linebuffer)
 {
-    currentInst[0].opcode = eOpcode::DATA_OUT;
-    currentInst[0].dir_flag = eOpcodeDir::DIR_OUT;
+    currentInst[0].IO_opcode = eOpcode::DATA_OUT;
+    currentInst[0].IO_dir_flag = eOpcodeDir::DIR_OUT;
+    currentInst[0].IO_dir_flag = 1;
 
 
     char * token = strtok(nullptr, " ,[]/");
@@ -500,7 +502,7 @@ eErrorType COpcode::ProcessDataOut(tInstBlock * currentInst, char * linebuffer)
         return eErrorType::UNKNOWN_REG_NAME;
     }
 
-    currentInst[0].reg_id = reg;
+    currentInst[0].IO_reg_id = reg;
 
     return eErrorType::NO_ERROR_DETECTED;
 }
@@ -514,8 +516,8 @@ eErrorType COpcode::ProcessNoOperation(tInstBlock * currentInst)
 
 eErrorType COpcode::ProcessInput(tInstBlock * currentInst, char * linebuffer)
 {
-	currentInst[0].opcode = eOpcode::DATA_IN;
-	currentInst[0].dir_flag = eOpcodeDir::DIR_IN;
+	currentInst[0].IO_opcode = eOpcode::DATA_IN;
+	currentInst[0].IO_dir_flag = eOpcodeDir::DIR_IN;
 
 	char * token = strtok(nullptr, " ,[]/");
     printf("in_reg>%s<\n", token);
@@ -527,7 +529,7 @@ eErrorType COpcode::ProcessInput(tInstBlock * currentInst, char * linebuffer)
 		return eErrorType::UNKNOWN_REG_NAME;
 	}
 
-	currentInst[0].reg_id = reg;
+	currentInst[0].IO_reg_id = reg;
 
 	return eErrorType::NO_ERROR_DETECTED;
 }

@@ -1,6 +1,6 @@
 /*
     Custom 8086 ASM Compiler
-    Author : Crspy
+    Author : Amr Zaki ( aka Crspy )
     Do not delete this comment block. Respect others' work!
 */
 
@@ -32,8 +32,7 @@ enum eOpcode : uint8_t
     COND_JUMP = 8,
     RETURN = 9,
     UNCOND_JUMP = 10,
-    INSTRUCTION_OUT = 11,
-    DATA_OUT = 12,
+    DATA_OUT = 11,
     NO_OPERATION = 13,
     DATA_IN = 14
 };
