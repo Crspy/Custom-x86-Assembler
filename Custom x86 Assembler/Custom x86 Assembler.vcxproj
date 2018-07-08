@@ -21,9 +21,9 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{46A7122A-3B36-480C-9D8A-FD856056334A}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Custom8086ASMCompiler</RootNamespace>
+    <RootNamespace>Customx86Assembler</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
-    <ProjectName>Custom x86 ASM Compiler</ProjectName>
+    <ProjectName>Custom x86 Assembler</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -169,7 +169,7 @@
     <ClInclude Include="WinMain.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Custom 8086 ASM Compiler.rc" />
+    <ResourceCompile Include="Custom x86 Assembler.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="icon.ico" />

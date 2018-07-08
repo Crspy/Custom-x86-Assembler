@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Custom 8086 ASM Compiler", "Custom 8086 ASM Compiler\Custom 8086 ASM Compiler.vcxproj", "{46A7122A-3B36-480C-9D8A-FD856056334A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Custom x86 Assembler", "Custom x86 Assembler\Custom x86 Assembler.vcxproj", "{46A7122A-3B36-480C-9D8A-FD856056334A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
