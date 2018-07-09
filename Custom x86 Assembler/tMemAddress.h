@@ -31,7 +31,7 @@ struct tMemAddress
 
     bool InsureMovAddress()
     {
-        if (this->m_Address > (32768 - 1))   
+        if (this->m_Address > (32768))   
             return false; 
 
         this->m_Address += 0x8000; // to access the data segment 
@@ -43,7 +43,7 @@ struct tMemAddress
 
     bool InsureJmpAddress()
     {
-        if (this->m_Address > (0xFFFF - 1))   return false; // we can't jmp to the data segment
+        if (this->m_Address > (0xFFFF))   return false; // we can't jmp to the data segment
 
         this->m_bNeedLoading = (this->m_Address > 0xFF) ? true : false;
 
@@ -52,7 +52,7 @@ struct tMemAddress
 
     bool InsureDataAddress() const
     {
-        return (this->m_Address > 32768 - 1) ? false : true;
+        return (this->m_Address > 32768) ? false : true;
     }
 
 };

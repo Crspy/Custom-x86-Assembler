@@ -48,25 +48,120 @@ void COpcode::EliminateTabs(char* line)
     }
 }
 
-eOpcodeDir COpcode::GetOpcodeDir(std::string& line)
+eOpcodeDir COpcode::GetOpcodeDir(std::string& line,eErrorType* errortype)
 {
+    *errortype = eErrorType::NO_ERROR_DETECTED;
+    eOpcodeDir opcodeDir;
     //std::stringstream ss(line);
     //std::getline(ss, line, ',');
     char* linebuff = static_cast<char*>(malloc(line.capacity())); // new linebuff because the old one is destroyed in tokenization
     strcpy(linebuff, line.c_str());
     char* token = strtok(linebuff,",");
-
+    char* token2 = strtok(nullptr, ","); 
     EliminateComments(token);  
-
-    if (strchr(token,'['))
+    if (strchr(token, '[') && strchr(token, ']'))
     {
-        free(linebuff);
-        return eOpcodeDir::DIR_OUT;
+        opcodeDir = DIR_OUT;
     }
+    else if (strchr(token, '['))
+    {
+        *errortype = eErrorType::MISSING_RIGHT_BRACKET;
+    }
+    else if (strchr(token, ']'))
+    {
+        *errortype = eErrorType::MISSING_LEFT_BRACKET;
+    }
+    else if (token2)
+    {
+        EliminateComments(token2);
+        if (strchr(token2, '[') && strchr(token2, ']'))
+        {
+            opcodeDir = DIR_IN;
+        }
+        else if (strchr(token2, '['))
+        {
+            *errortype = eErrorType::MISSING_RIGHT_BRACKET;
+        }
+        else if (strchr(token2, ']'))
+        {
+            *errortype = eErrorType::MISSING_LEFT_BRACKET;
+        }
+        else
+            opcodeDir = DIR_IMM;
+    }
+    else
+        opcodeDir = DIR_IMM;
 
     free(linebuff);
-    return eOpcodeDir::DIR_IN;
+    return opcodeDir;
 
+}
+
+
+eErrorType COpcode::ProcessImmMove(tMemAddress* memadd, tInstBlock* currentInst, std::string& line,
+    std::map<uint32_t, std::string>& constDataMovLabelsMap, uint32_t PC)
+{
+    currentInst[0].opcode = eOpcode::IMM_MOVE;
+
+    currentInst[0].dir_flag = eOpcodeDir::DIR_IN;
+
+
+    char * token = strtok(nullptr, " ,[]/");
+    EliminateTabs(token);
+    printf("MoveIN_Operand1:%s\n", token);
+    int8_t reg = GetRegID(token);
+    if (reg == -1)
+    {
+        return eErrorType::UNKNOWN_REG_NAME;
+    }
+
+    char* token2 = strtok(nullptr, ",[]/");
+    EliminateComments(token2); EliminateTabs(token2);
+    printf("MoveIN_Operand2:%s\n", token2);
+    if (GetRegID(token2) >= 0)
+    {
+        return eErrorType::USING_REGNAME_INSTEAD_OF_IMM_VALUE; // instead of an immediate value
+    }
+
+    if (is_numbers_only(token2))
+    {
+        memadd->m_Address = strtol(token2, nullptr, 0);
+
+        printf("ImMOVE_Value:%d\n", memadd->m_Address);
+
+        if (!memadd->InsureJmpAddress())
+        {
+            return eErrorType::IMM_VALUE_EXCEEDS;
+        }
+        if (memadd->m_bNeedLoading)
+        {
+            currentInst[1].address = memadd->byte0; // lowbyte for mov
+            currentInst[1].opcode = currentInst[0].opcode;
+            currentInst[1].dir_flag = currentInst[0].dir_flag;
+            currentInst[0].opcode = eOpcode::LOAD;
+            currentInst[0].reg_id = 0;
+            currentInst[0].dir_flag = eOpcodeDir::DIR_IN; // DirFlag for Loading is 0
+            currentInst[0].address = memadd->byte1; // highbyte for load
+
+        }
+        else
+        {
+            currentInst[0].address = memadd->byte0;
+        }
+    }
+    else
+    {
+        return eErrorType::ONLY_IMM_VALUE_ALLOWED_IN_IMM_MOV;
+
+    }
+
+
+
+    if (memadd->m_bNeedLoading)
+        currentInst[1].reg_id = reg;
+    else
+        currentInst[0].reg_id = reg;
+    return eErrorType::NO_ERROR_DETECTED;
 }
 
 
@@ -267,24 +362,25 @@ eErrorType COpcode::ProcessIndirectMoveOUT(tMemAddress* memadd, tInstBlock* curr
 
     currentInst[0].dir_flag = eOpcodeDir::DIR_OUT;
 
-    char * token = strtok(nullptr, " [], \t");
+    char * token = strtok(nullptr, " [],\t");
     EliminateTabs(token);
     printf("IndirectMoveOUT_Operand1:%s\n", token);
     int8_t reg2 = GetRegID(token);
-    if (reg2 == -1 || reg2 != eRegID::BX) // then it's moving value to dataSeg
+    if (reg2 == -1 /*|| reg2 != eRegID::BX*/) // then it's moving value to dataSeg
     {
-        return eErrorType::UNKNOWN_REG_NAME_OR_NOT_USING_BX_IN_LEFT_OPERAND;
+        return eErrorType::UNKNOWN_REG_NAME_IN_LEFT_OPERAND;
     }
 
-    token = strtok(nullptr, " [], \t");
+    token = strtok(nullptr, " [],\t");
     EliminateComments(token); EliminateTabs(token);
     printf("IndirectMoveOUT_Operand2:%s\n", token);
     int8_t reg = GetRegID(token);
-    if (reg == -1 || reg == eRegID::BX) // then it's moving value to dataSeg
+    if (reg == -1 /*|| reg == eRegID::BX*/) // then it's moving value to dataSeg
     {
-        return eErrorType::UNKNOWN_REG_NAME_OR_USING_BX_IN_RIGHT_OPERAND;
+        return eErrorType::UNKNOWN_REG_NAME_IN_RIGHT_OPERAND;
     }
-    currentInst[0].reg_id = reg;
+    currentInst[0].regALU_id = reg;
+    currentInst[0].reg2ALU_id = reg2;
 
     return eErrorType::NO_ERROR_DETECTED;
 }
@@ -295,25 +391,26 @@ eErrorType COpcode::ProcessIndirectMoveIN(tMemAddress* memadd, tInstBlock* curre
     currentInst[0].opcode = eOpcode::INDIRECT_IN;
     currentInst[0].dir_flag = eOpcodeDir::DIR_IN;
 
-    char * token = strtok(nullptr, " [], \t");
+    char * token = strtok(nullptr, " ,[]\t");
     EliminateTabs(token);
     printf("IndirectMoveIN_Operand1:%s\n", token);
     int8_t reg = GetRegID(token);
-    if (reg == -1 || reg == eRegID::BX) // then it's moving value to dataSeg
+    if (reg == -1 /*|| reg == eRegID::BX*/) // then it's moving value to dataSeg
     {
-        return eErrorType::UNKNOWN_REG_NAME_OR_USING_BX_IN_LEFT_OPERAND;
+        return eErrorType::UNKNOWN_REG_NAME_IN_LEFT_OPERAND;
     }
 
-    token = strtok(nullptr, " [], \t");
+    token = strtok(nullptr, " ,[]\t");
     EliminateComments(token); EliminateTabs(token);
     printf("IndirectMoveIN_Operand2:%s\n", token);
 
     int8_t reg2 = GetRegID(token);
-    if (reg2 == -1 || reg2 != eRegID::BX) // then it's moving value to dataSeg
+    if (reg2 == -1 /*|| reg2 != eRegID::BX*/) // then it's moving value to dataSeg
     {
-        return eErrorType::UNKNOWN_REG_NAME_OR_NOT_USING_BX_IN_RIGHT_OPERAND;
+        return eErrorType::UNKNOWN_REG_NAME_IN_RIGHT_OPERAND;
     }
-    currentInst[0].reg_id = reg;
+    currentInst[0].regALU_id = reg;
+    currentInst[0].reg2ALU_id = reg2;
 
     return eErrorType::NO_ERROR_DETECTED;
 }
@@ -465,7 +562,7 @@ eErrorType COpcode::ProcessInstOut(tInstBlock * currentInst, char * linebuffer)
 {
     currentInst[0].IO_opcode = eOpcode::DATA_OUT;
     currentInst[0].IO_dir_flag = eOpcodeDir::DIR_OUT;
-    currentInst[0].IO_dir_flag = 0;
+    currentInst[0].OUT_type = 0;
 
 
     char * token = strtok(nullptr, " ,[]/");
@@ -488,7 +585,7 @@ eErrorType COpcode::ProcessDataOut(tInstBlock * currentInst, char * linebuffer)
 {
     currentInst[0].IO_opcode = eOpcode::DATA_OUT;
     currentInst[0].IO_dir_flag = eOpcodeDir::DIR_OUT;
-    currentInst[0].IO_dir_flag = 1;
+    currentInst[0].OUT_type = 1;
 
 
     char * token = strtok(nullptr, " ,[]/");
@@ -511,6 +608,13 @@ eErrorType COpcode::ProcessNoOperation(tInstBlock * currentInst)
 {
     currentInst[0].opcode = eOpcode::NO_OPERATION;    
     
+    return eErrorType::NO_ERROR_DETECTED;
+}
+
+eErrorType COpcode::ProcessBreakPoint(tInstBlock * currentInst)
+{
+    currentInst[0].opcode = eOpcode::BREAK_POINT;
+
     return eErrorType::NO_ERROR_DETECTED;
 }
 

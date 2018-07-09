@@ -15,8 +15,14 @@ void CErrorHandler::PrintErrorMessage(eErrorType errortype, unsigned long lineco
     case USING_REGNAME_INSTEAD_OF_ADDRESS:
         message = "Compiler Error, using Reg name instead of a memory address...in line : %ld\n";
         break;
+    case USING_REGNAME_INSTEAD_OF_IMM_VALUE:
+        message = "Compiler Error, using Reg name instead of an Immediate value...in line : %ld\n";
+        break;
     case MEM_ADDRESS_EXCEEDS:
-        message = "Compiler Error, Memory Address out of bounds, exceeds 0xFFFE...in line : %ld\n";
+        message = "Compiler Error, Memory Address out of bounds, exceeds 0xFFFF...in line : %ld\n";
+        break;
+    case IMM_VALUE_EXCEEDS:
+        message = "Compiler Error, Immediate value out of bounds, exceeds 0xFFFF...in line : %ld\n";
         break;
     case UNKNOWN_REG_NAME:
         message = "Compiler Error, unknown reg name....in line : %ld\n";
@@ -24,17 +30,14 @@ void CErrorHandler::PrintErrorMessage(eErrorType errortype, unsigned long lineco
     case DATA_VALUE_OUTOFBOUNDS:
         message = "Compiler Error, data value is Out Of Bounds signed short integer...in line : %ld\n";
         break;
-    case UNKNOWN_REG_NAME_OR_NOT_USING_BX_IN_LEFT_OPERAND:
-        message = "Compiler Error, unknown reg name or not using bx in left operand...in line : %ld\n";
+    case UNKNOWN_REG_NAME_IN_LEFT_OPERAND:
+        message = "Compiler Error, unknown reg name in left operand...in line : %ld\n";
         break;
-    case UNKNOWN_REG_NAME_OR_USING_BX_IN_RIGHT_OPERAND:
-        message = "Compiler Error, unknown reg name or using bx in right operand...in line : %ld\n";
+    case UNKNOWN_REG_NAME_IN_RIGHT_OPERAND:
+        message = "Compiler Error, unknown reg name in right operand...in line : %ld\n";
         break;
-    case UNKNOWN_REG_NAME_OR_USING_BX_IN_LEFT_OPERAND:
-        message = "Compiler Error, unknown reg name or using bx in left operand...in line : %ld\n";
-        break;
-    case UNKNOWN_REG_NAME_OR_NOT_USING_BX_IN_RIGHT_OPERAND:
-        message = "Compiler Error, unknown reg name or not using bx in right operand...in line : %ld\n";
+    case ONLY_IMM_VALUE_ALLOWED_IN_IMM_MOV:
+        message = "Compiler Error, Only Immediate value allowed in immediate mov...in line : %ld\n";
         break;
     case UNKNOWN_OPCODE:
         message = "Compiler Error, Unknown opcode... in line : %ld\n";
@@ -72,6 +75,12 @@ void CErrorHandler::PrintErrorMessage(eErrorType errortype, unsigned long lineco
 	case UNKNOWN_EXTENSION_ONLY_ASM_ALLOWED:
 		message = "Compiler Error , Unknown extension... Only \".asm\" is supported\n";
 		break;
+	case MISSING_LEFT_BRACKET:
+		message = "Compiler Error , Expected a \"[\" ... in line : %ld\n";
+		break;
+    case MISSING_RIGHT_BRACKET:
+        message = "Compiler Error , Expected a \"]\" ... in line : %ld\n";
+        break;
     default:
         break;
     }

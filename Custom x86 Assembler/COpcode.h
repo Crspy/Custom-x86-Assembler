@@ -21,8 +21,10 @@ enum eRegID : uint8_t
 
 enum eOpcode : uint8_t
 {
+    BREAK_POINT = 0,
     MOVE_IN = 1,
     MOVE_OUT = MOVE_IN,
+    IMM_MOVE = 2,
     LOAD = 3,
     INDIRECT_IN = 4,
     INDIRECT_OUT = INDIRECT_IN,
@@ -40,7 +42,8 @@ enum eOpcode : uint8_t
 enum eOpcodeDir : uint8_t
 {
     DIR_IN,
-    DIR_OUT
+    DIR_OUT,
+    DIR_IMM
 };
 
 enum eALUOpcode
@@ -96,7 +99,11 @@ public:
 
     static int8_t GetRegID(const char* lineReg);
 
-    static eOpcodeDir GetOpcodeDir(std::string& line);
+    static eOpcodeDir GetOpcodeDir(std::string& line, eErrorType* errortype);
+
+
+    static eErrorType COpcode::ProcessImmMove(tMemAddress* memadd, tInstBlock* currentInst, std::string& line,
+        std::map<uint32_t, std::string>& constDataMovLabelsMap, uint32_t PC);
 
     static eErrorType ProcessMoveOUT(tMemAddress* memadd, tInstBlock* currentInst, char* linebuffer,
         bool* bMovingData, CROMBlock* myrom,std::map<uint32_t,std::string>& constDataMovLabelsMap,uint32_t PC);
@@ -158,6 +165,8 @@ public:
     static eErrorType ProcessDataOut(tInstBlock* currentInst, char* linebuffer);
 
     static eErrorType ProcessNoOperation(tInstBlock * currentInst);
+
+    static eErrorType ProcessBreakPoint(tInstBlock * currentInst);
 
 	static eErrorType ProcessInput(tInstBlock* currentInst, char* linebuffer);
 };
